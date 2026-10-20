@@ -7,6 +7,9 @@ name = "vulcan-eda-uvm"
 version = "0.0.0"
 description = "A UVM-based verification environment using cocotb and pyuvm"
 requires-python = ">=3.8"
+dependencies = [
+    "cocotb == 2.1.0",
+]
 
 [tool.setuptools]
 packages = ["vulcan_eda.uvm"]
