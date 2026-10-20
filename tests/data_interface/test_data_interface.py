@@ -27,10 +27,12 @@ class DataInterfaceEnv(pyuvm.uvm_env):
 class DataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = DataInterfaceEnv("env", self)
+        self.random_data_sequence = vulcan_eda.uvm.sequences.RandomDataSequence("random_data_sequence")
 
     async def run_phase(self):
         self.raise_objection()
-        cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, units = "ns").start())
+        cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
+        await self.random_data_sequence.start(self.env.upstream_agent.sequencer)
         self.drop_objection()
 
 def test_data_interface():

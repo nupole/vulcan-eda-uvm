@@ -7,5 +7,5 @@ class Driver(pyuvm.uvm_driver):
     async def run_phase(self):
         while True:
             sequence_item = await self.seq_item_port.get_next_item()
-            await self._interface.put(seq_item)
+            await self._interface.put(sequence_item)
             self.seq_item_port.item_done()

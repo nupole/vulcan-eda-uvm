@@ -8,8 +8,7 @@ class DataInterface(BaseInterface):
         self._data = data
 
     async def put(self, sequence_item):
-        async def put(self, sequence_item):
-            await self.put_data(sequence_item.data)
+        await self.put_data(sequence_item.data)
 
     async def put_data(self, data):
         await cocotb.triggers.RisingEdge(self._clk)
@@ -18,5 +17,5 @@ class DataInterface(BaseInterface):
     async def get(self):
         while True:
             await cocotb.triggers.FallingEdge(self._clk)
-            if self._data_pin.value.is_resolvable:
+            if self._data.value.is_resolvable:
                 return self._data.value

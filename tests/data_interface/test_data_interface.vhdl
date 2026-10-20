@@ -9,4 +9,9 @@ end entity;
 
 architecture rtl of test_data_interface is
 begin
+    process(clk) begin
+        if rising_edge(clk) then
+            downstream_data <= upstream_data;
+        end if;
+    end process;
 end architecture;

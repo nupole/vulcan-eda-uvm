@@ -5,8 +5,6 @@ import pyuvm
 class TransactionSequence(pyuvm.uvm_sequence):
     def __init__(self, name):
         super().__init__(name)
-        self.txn_pct = pyuvm.ConfigDB().get(self, "", "txn_pct", 100)
-        self.max_num_txn = pyuvm.ConfigDB().get(self, "", "max_num_txn", 10)
 
     @property
     def txn_pct(self):
@@ -29,6 +27,8 @@ class TransactionSequence(pyuvm.uvm_sequence):
         self._max_num_txn = value
 
     async def body(self):
+        self.txn_pct = pyuvm.ConfigDB().get(self.sequencer, "", "txn_pct", 100)
+        self.max_num_txn = pyuvm.ConfigDB().get(self.sequencer, "", "max_num_txn", 10)
         num_txn = 0
         while num_txn < self.max_num_txn:
             is_txn = random.randint(1, 100) <= self.txn_pct
