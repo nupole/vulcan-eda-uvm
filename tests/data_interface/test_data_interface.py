@@ -12,15 +12,13 @@ import vulcan_eda.uvm.monitors.monitor
 
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
-        self.upstream_sequencer = pyuvm.uvm_sequencer.create("upstream_sequencer", self)
         upstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data)
-        pyuvm.ConfigDB().set(self, "upstream_driver", "interface", upstream_interface)
-        self.upstream_driver = vulcan_eda.uvm.drivers.driver.Driver.create("upstream_driver", self)
-        pyuvm.ConfigDB().set(self, "upstream_monitor", "interface", upstream_interface)
-        self.upstream_monitor = vulcan_eda.uvm.monitors.monitor.Monitor.create("upstream_monitor", self)
-
-    def connect_phase(self):
-        self.upstream_driver.seq_item_port.connect(self.upstream_sequencer.seq_item_export)
+        pyuvm.ConfigDB().set(self, "upstream_agent", "interface", upstream_interface)
+        self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
+        downstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.downstream_data)
+        pyuvm.ConfigDB().set(self, "downstream_agent", "interface", downstream_interface)
+        pyuvm.ConfigDB().set(self, "downstream_agent", "is_active", pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
 
 @pyuvm.test()
 class DataInterfaceTest(pyuvm.uvm_test):

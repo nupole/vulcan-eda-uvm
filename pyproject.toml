@@ -21,7 +21,8 @@ test = [
 packages = ["vulcan_eda.uvm",
             "vulcan_eda.uvm.interfaces",
             "vulcan_eda.uvm.drivers",
-            "vulcan_eda.uvm.monitors"]
+            "vulcan_eda.uvm.monitors",
+            "vulcan_eda.uvm.agents"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
