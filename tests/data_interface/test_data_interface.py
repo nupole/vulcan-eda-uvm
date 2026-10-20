@@ -7,8 +7,6 @@ import cocotb_tools.runner
 import pyuvm
 
 import vulcan_eda.uvm
-import vulcan_eda.uvm.drivers.driver
-import vulcan_eda.uvm.monitors.monitor
 
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
@@ -19,6 +17,11 @@ class DataInterfaceEnv(pyuvm.uvm_env):
         pyuvm.ConfigDB().set(self, "downstream_agent", "interface", downstream_interface)
         pyuvm.ConfigDB().set(self, "downstream_agent", "is_active", pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
+        self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
+
+    def connect_phase(self):
+        self.upstream_agent.analysis_port.connect(self.scoreboard.expected_data_analysis_fifo.analysis_export)
+        self.downstream_agent.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()
 class DataInterfaceTest(pyuvm.uvm_test):
