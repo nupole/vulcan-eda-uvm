@@ -6,10 +6,21 @@ build-backend = "setuptools.build_meta"
 name = "vulcan-eda-uvm"
 version = "0.0.0"
 description = "A UVM-based verification environment using cocotb and pyuvm"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "cocotb == 2.1.0",
+    "pyuvm == 5.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
 ]
 
 [tool.setuptools]
-packages = ["vulcan_eda.uvm"]
+packages = ["vulcan_eda.uvm",
+            "vulcan_eda.uvm.interfaces",
+            "vulcan_eda.uvm.drivers"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
