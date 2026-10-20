@@ -27,12 +27,13 @@ class ValidDataInterfaceEnv(pyuvm.uvm_env):
 class ValidDataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = ValidDataInterfaceEnv("env", self)
-        # self.random_valid_data_sequence = vulcan_eda.uvm.sequences.RandomValidDataSequence("random_valid_data_sequence")
+        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "txn_pct", 50)
+        self.random_valid_data_sequence = vulcan_eda.uvm.sequences.RandomValidDataSequence("random_valid_data_sequence")
 
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        # await self.random_data_sequence.start(self.env.upstream_agent.sequencer)
+        await self.random_valid_data_sequence.start(self.env.upstream_agent.sequencer)
         self.drop_objection()
 
 def test_valid_data_interface():
@@ -52,5 +53,6 @@ def test_valid_data_interface():
         hdl_toplevel_lang = "vhdl",
         build_dir = current_dir,
         test_dir = current_dir,
-        test_args = ["--std=08"]
+        test_args = ["--std=08"],
+        plusargs = ["--fst=waves.fst"]
     )

@@ -1,1 +1,2 @@
 from vulcan_eda.uvm.sequences.data_sequence import RandomDataSequence
+from vulcan_eda.uvm.sequences.valid_data_sequence import RandomValidDataSequence
