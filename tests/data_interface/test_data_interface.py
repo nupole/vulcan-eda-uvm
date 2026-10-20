@@ -8,6 +8,7 @@ import pyuvm
 
 import vulcan_eda.uvm
 import vulcan_eda.uvm.drivers.driver
+import vulcan_eda.uvm.monitors.monitor
 
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
@@ -15,6 +16,8 @@ class DataInterfaceEnv(pyuvm.uvm_env):
         upstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data)
         pyuvm.ConfigDB().set(self, "upstream_driver", "interface", upstream_interface)
         self.upstream_driver = vulcan_eda.uvm.drivers.driver.Driver.create("upstream_driver", self)
+        pyuvm.ConfigDB().set(self, "upstream_monitor", "interface", upstream_interface)
+        self.upstream_monitor = vulcan_eda.uvm.monitors.monitor.Monitor.create("upstream_monitor", self)
 
     def connect_phase(self):
         self.upstream_driver.seq_item_port.connect(self.upstream_sequencer.seq_item_export)
