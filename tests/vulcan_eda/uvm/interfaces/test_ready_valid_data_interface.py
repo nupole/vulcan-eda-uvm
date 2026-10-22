@@ -10,7 +10,7 @@ import vulcan_eda.uvm
 
 class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
-        upstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataInterface(cocotb.top.clk, cocotb.top.upstream_ready, cocotb.top.upstream_valid, cocotb.top.upstream_data)
+        upstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(cocotb.top.clk, cocotb.top.upstream_ready, cocotb.top.upstream_valid, cocotb.top.upstream_data)
         pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataInterface(cocotb.top.clk, cocotb.top.downstream_ready, cocotb.top.downstream_valid, cocotb.top.downstream_data)
