@@ -20,12 +20,12 @@ class ReadyValidDataInterface(BaseInterface):
         await self._ready_interface.put_data(ready)
 
     async def put_valid_data(self, valid, data):
-        await self._valid_data_interface.put_valid_data(valid, data)
+        await self._valid_data_interface.put_valid_data(valid, self._to_values(data))
         if valid:
             await self._is_consumed()
 
     async def get(self):
-        return await self._is_consumed()
+        return self._from_values(await self._is_consumed())
 
     async def get_ready_valid_data(self):
         ready_interface_task = cocotb.start_soon(self._ready_interface.get())
@@ -40,3 +40,9 @@ class ReadyValidDataInterface(BaseInterface):
             ready, valid, data = await self.get_ready_valid_data()
             if ready == 1 and valid == 1:
                 return data
+
+    def _to_values(self, data):
+        return data
+
+    def _from_values(self, values):
+        return values
