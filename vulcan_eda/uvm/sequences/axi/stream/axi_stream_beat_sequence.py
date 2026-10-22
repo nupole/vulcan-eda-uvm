@@ -5,12 +5,7 @@ import pyuvm
 
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
 from vulcan_eda.uvm.sequences.transaction_sequence import TransactionSequence
-
-class AxiStreamBeatSequenceItem(pyuvm.uvm_sequence_item):
-    def __init__(self, name, valid, beat):
-        super().__init__(name)
-        self.valid = valid
-        self.beat = beat
+from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequenceItem
 
 class AxiStreamBeatSequence(TransactionSequence):
     def __init__(self, name, beats):
@@ -28,7 +23,7 @@ class AxiStreamBeatSequence(TransactionSequence):
             beat = self._beats.popleft()
         else:
             beat = self._get_idle_beat()
-        return AxiStreamBeatSequenceItem('axi_stream_beat_sequence_item', is_txn, beat)
+        return ValidDataSequenceItem('axi_stream_beat_sequence_item', is_txn, beat)
 
     def _get_idle_beat(self):
         data = random.getrandbits(8 * self._num_bytes)

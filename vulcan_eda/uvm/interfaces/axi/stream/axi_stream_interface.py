@@ -1,8 +1,8 @@
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_interface import ReadyValidDataInterface
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequenceItem
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequenceItem
 from vulcan_eda.uvm.signals import Bundle
 
 class AxiStreamInterface(BaseInterface):
@@ -19,8 +19,8 @@ class AxiStreamInterface(BaseInterface):
     async def put(self, sequence_item):
         if isinstance(sequence_item, DataSequenceItem):
             await self.put_ready(sequence_item.data)
-        elif isinstance(sequence_item, AxiStreamBeatSequenceItem):
-            await self.put_beat(sequence_item.valid, sequence_item.beat)
+        elif isinstance(sequence_item, ValidDataSequenceItem):
+            await self.put_beat(sequence_item.valid, sequence_item.data)
 
     async def put_ready(self, ready):
         await self._ready_valid_data_interface.put_ready(ready)

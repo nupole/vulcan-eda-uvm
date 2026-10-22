@@ -28,8 +28,8 @@ def sequencer():
 
 def run(sequencer, beats):
     asyncio.run(AxiStreamBeatSequence("axi_stream_beat_sequence", beats).start(sequencer))
-    valid_beats = [item.beat for item in sequencer.items if item.valid]
-    idle_beats = [item.beat for item in sequencer.items if not item.valid]
+    valid_beats = [item.data for item in sequencer.items if item.valid]
+    idle_beats = [item.data for item in sequencer.items if not item.valid]
     return valid_beats, idle_beats
 
 BEATS = [AxiStreamBeat(beat, beat == 63) for beat in range(64)]
