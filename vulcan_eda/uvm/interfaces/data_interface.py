@@ -15,7 +15,5 @@ class DataInterface(BaseInterface):
         self._data.value = data
 
     async def get(self):
-        while True:
-            await cocotb.triggers.FallingEdge(self._clk)
-            if self._data.value.is_resolvable:
-                return self._data.value
+        await cocotb.triggers.FallingEdge(self._clk)
+        return self._data.value

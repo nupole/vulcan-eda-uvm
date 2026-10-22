@@ -18,7 +18,7 @@ class ValidDataInterface:
     async def get(self):
         while True:
             valid, data = await self.get_valid_data()
-            if valid:
+            if valid == 1:
                 return data
 
     async def get_valid_data(self):

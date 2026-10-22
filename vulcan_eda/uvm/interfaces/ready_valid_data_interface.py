@@ -37,5 +37,5 @@ class ReadyValidDataInterface:
     async def _is_consumed(self):
         while True:
             ready, valid, data = await self.get_ready_valid_data()
-            if ready and valid:
+            if ready == 1 and valid == 1:
                 return data
