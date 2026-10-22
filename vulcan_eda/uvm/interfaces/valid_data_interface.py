@@ -1,8 +1,9 @@
 import cocotb
 
 from vulcan_eda.uvm.interfaces import DataInterface
+from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 
-class ValidDataInterface:
+class ValidDataInterface(BaseInterface):
     def __init__(self, clk, valid, data):
         self._valid_interface = DataInterface(clk, valid)
         self._data_interface = DataInterface(clk, data)

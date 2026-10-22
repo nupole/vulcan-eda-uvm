@@ -1,10 +1,11 @@
+from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_interface import ReadyValidDataInterface
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequenceItem
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 from vulcan_eda.uvm.signals import Bundle
 
-class AxiStreamInterface:
+class AxiStreamInterface(BaseInterface):
     def __init__(self, clk, tready, tvalid, tdata, tlast):
         self._ready_valid_data_interface = ReadyValidDataInterface(clk, tready, tvalid, Bundle(tdata, tlast))
 

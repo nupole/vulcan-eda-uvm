@@ -1,10 +1,11 @@
 import cocotb
 
 from vulcan_eda.uvm.interfaces import DataInterface, ValidDataInterface
+from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequenceItem
 
-class ReadyValidDataInterface:
+class ReadyValidDataInterface(BaseInterface):
     def __init__(self, clk, ready, valid, data):
         self._ready_interface = DataInterface(clk, ready)
         self._valid_data_interface = ValidDataInterface(clk, valid, data)
