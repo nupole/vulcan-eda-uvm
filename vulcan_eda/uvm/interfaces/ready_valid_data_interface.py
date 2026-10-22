@@ -2,27 +2,11 @@ import cocotb
 
 from vulcan_eda.uvm.interfaces import DataInterface, ValidDataInterface
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
-from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequenceItem
 
 class ReadyValidDataInterface(BaseInterface):
     def __init__(self, clk, ready, valid, data):
         self._ready_interface = DataInterface(clk, ready)
         self._valid_data_interface = ValidDataInterface(clk, valid, data)
-
-    async def put(self, sequence_item):
-        if isinstance(sequence_item, DataSequenceItem):
-            await self.put_ready(sequence_item.data)
-        elif isinstance(sequence_item, ValidDataSequenceItem):
-            await self.put_valid_data(sequence_item.valid, sequence_item.data)
-
-    async def put_ready(self, ready):
-        await self._ready_interface.put_data(ready)
-
-    async def put_valid_data(self, valid, data):
-        await self._valid_data_interface.put_valid_data(valid, self._to_values(data))
-        if valid:
-            await self._is_consumed()
 
     async def get(self):
         return self._from_values(await self._is_consumed())
@@ -40,9 +24,6 @@ class ReadyValidDataInterface(BaseInterface):
             ready, valid, data = await self.get_ready_valid_data()
             if ready == 1 and valid == 1:
                 return data
-
-    def _to_values(self, data):
-        return data
 
     def _from_values(self, values):
         return values

@@ -3,3 +3,11 @@ from vulcan_eda.uvm.interfaces.ready_valid_data_interface import ReadyValidDataI
 class ReadyValidDataTransmitterInterface(ReadyValidDataInterface):
     async def put(self, sequence_item):
         await self.put_valid_data(sequence_item.valid, sequence_item.data)
+
+    async def put_valid_data(self, valid, data):
+        await self._valid_data_interface.put_valid_data(valid, self._to_values(data))
+        if valid:
+            await self._is_consumed()
+
+    def _to_values(self, data):
+        return data
