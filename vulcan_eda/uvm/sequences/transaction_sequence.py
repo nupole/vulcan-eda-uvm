@@ -26,9 +26,12 @@ class TransactionSequence(pyuvm.uvm_sequence):
             raise ValueError("max_num_txn must be positive")
         self._max_num_txn = value
 
-    async def body(self):
+    def _configure(self):
         self.txn_pct = pyuvm.ConfigDB().get(self.sequencer, "", "txn_pct", 100)
         self.max_num_txn = pyuvm.ConfigDB().get(self.sequencer, "", "max_num_txn", 10)
+
+    async def body(self):
+        self._configure()
         num_txn = 0
         while num_txn < self.max_num_txn:
             is_txn = random.randint(1, 100) <= self.txn_pct
