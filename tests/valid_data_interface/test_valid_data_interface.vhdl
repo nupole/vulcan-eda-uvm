@@ -11,10 +11,6 @@ end entity;
 
 architecture rtl of test_valid_data_interface is
 begin
-    process(clk) begin
-        if rising_edge(clk) then
-            downstream_valid <= upstream_valid;
-            downstream_data  <= upstream_data;
-        end if;
-    end process;
+    downstream_valid <= upstream_valid;
+    downstream_data  <= upstream_data;
 end architecture;
