@@ -17,10 +17,12 @@ class ValidDataInterface:
 
     async def get(self):
         while True:
-            valid_interface_task = cocotb.start_soon(self._valid_interface.get())
-            data_interface_task = cocotb.start_soon(self._data_interface.get())
-            await cocotb.triggers.Combine(valid_interface_task, data_interface_task)
-            valid = valid_interface_task.result()
-            data = data_interface_task.result()
+            valid, data = await self.get_valid_data()
             if valid:
                 return data
+
+    async def get_valid_data(self):
+        valid_interface_task = cocotb.start_soon(self._valid_interface.get())
+        data_interface_task = cocotb.start_soon(self._data_interface.get())
+        await cocotb.triggers.Combine(valid_interface_task, data_interface_task)
+        return valid_interface_task.result(), data_interface_task.result()
