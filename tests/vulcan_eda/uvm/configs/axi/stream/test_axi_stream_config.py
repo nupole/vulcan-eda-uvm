@@ -1,9 +1,17 @@
+import cocotb.types
 import pytest
 
 from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
 
 def test_num_bytes():
     assert AxiStreamConfig(num_bytes=4).num_bytes == 4
+
+def test_from_tdata():
+    assert AxiStreamConfig.from_tdata(cocotb.types.LogicArray(0, 32)) == AxiStreamConfig(num_bytes=4)
+
+def test_from_tdata_rejects_partial_byte():
+    with pytest.raises(ValueError):
+        AxiStreamConfig.from_tdata(cocotb.types.LogicArray(0, 12))
 
 def test_requires_num_bytes():
     with pytest.raises(TypeError):

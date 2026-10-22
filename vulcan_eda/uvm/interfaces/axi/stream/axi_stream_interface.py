@@ -7,14 +7,7 @@ from vulcan_eda.uvm.signals import Bundle
 
 class AxiStreamInterface(BaseInterface):
     def __init__(self, clk, tready, tvalid, tdata, tlast):
-        if not (len(tdata) % 8 == 0):
-            raise ValueError("tdata width must be a multiple of 8")
-        self._num_bytes = len(tdata) // 8
         self._ready_valid_data_interface = ReadyValidDataInterface(clk, tready, tvalid, Bundle(tdata, tlast))
-
-    @property
-    def num_bytes(self):
-        return self._num_bytes
 
     async def put(self, sequence_item):
         if isinstance(sequence_item, DataSequenceItem):

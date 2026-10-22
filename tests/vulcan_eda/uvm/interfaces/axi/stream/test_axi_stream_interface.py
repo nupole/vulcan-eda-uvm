@@ -17,7 +17,7 @@ from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacke
 class AxiStreamInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = AxiStreamInterface(cocotb.top.clk, cocotb.top.upstream_tready, cocotb.top.upstream_tvalid, cocotb.top.upstream_tdata, cocotb.top.upstream_tlast)
-        self.upstream_axi_stream_config = AxiStreamConfig(num_bytes=upstream_interface.num_bytes)
+        self.upstream_axi_stream_config = AxiStreamConfig.from_tdata(cocotb.top.upstream_tdata)
         pyuvm.ConfigDB().set(self, "upstream_agent.sequencer", "axi_stream_config", self.upstream_axi_stream_config)
         pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
