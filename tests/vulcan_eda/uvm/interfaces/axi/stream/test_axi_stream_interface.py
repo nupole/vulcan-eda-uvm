@@ -50,14 +50,14 @@ class AxiStreamInterfaceTest(pyuvm.uvm_test):
             random_data_sequence = vulcan_eda.uvm.sequences.RandomDataSequence("random_data_sequence")
             await random_data_sequence.start(self.env.downstream_agent.sequencer)
 
-def test_axi_stream_interface():
+def test_axi_stream_interface(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')
     current_dir = pathlib.Path(__file__).parent
 
     runner.build(
         hdl_toplevel = "test_axi_stream_interface",
         sources = [current_dir / "test_axi_stream_interface.vhdl"],
-        build_dir = current_dir,
+        build_dir = build_dir,
         build_args = ["--std=08"]
     )
 
@@ -65,8 +65,8 @@ def test_axi_stream_interface():
         test_module = "test_axi_stream_interface",
         hdl_toplevel = "test_axi_stream_interface",
         hdl_toplevel_lang = "vhdl",
-        build_dir = current_dir,
-        test_dir = current_dir,
+        build_dir = build_dir,
+        test_dir = build_dir,
         test_args = ["--std=08"],
         plusargs = ["--fst=waves.fst"]
     )

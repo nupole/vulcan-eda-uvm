@@ -34,14 +34,14 @@ class ReadyValidDataInterfaceTest(pyuvm.uvm_test):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         self.drop_objection()
 
-def test_ready_valid_data_interface():
+def test_ready_valid_data_interface(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')
-    current_dir = pathlib.Path().absolute() / "tests" / "ready_valid_data_interface"
+    current_dir = pathlib.Path(__file__).parent
 
     runner.build(
         hdl_toplevel = "test_ready_valid_data_interface",
         sources = [current_dir / "test_ready_valid_data_interface.vhdl"],
-        build_dir = current_dir,
+        build_dir = build_dir,
         build_args = ["--std=08"]
     )
 
@@ -49,8 +49,8 @@ def test_ready_valid_data_interface():
         test_module = "test_ready_valid_data_interface",
         hdl_toplevel = "test_ready_valid_data_interface",
         hdl_toplevel_lang = "vhdl",
-        build_dir = current_dir,
-        test_dir = current_dir,
+        build_dir = build_dir,
+        test_dir = build_dir,
         test_args = ["--std=08"],
         plusargs = ["--fst=waves.fst"]
     )
