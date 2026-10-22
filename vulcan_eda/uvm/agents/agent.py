@@ -7,15 +7,16 @@ class Agent(pyuvm.uvm_agent):
     def build_phase(self):
         super().build_phase()
 
-        interface = pyuvm.ConfigDB().get(self, "", "interface")
+        config = pyuvm.ConfigDB().get(self, "", "config")
+        self.is_active = config.is_active
 
         if self.active():
             self.sequencer = pyuvm.uvm_sequencer.create("sequencer", self)
 
-            pyuvm.ConfigDB().set(self, "driver", "interface", interface)
+            pyuvm.ConfigDB().set(self, "driver", "interface", config.interface)
             self._driver = Driver.create("driver", self)
 
-        pyuvm.ConfigDB().set(self, "monitor", "interface", interface)
+        pyuvm.ConfigDB().set(self, "monitor", "interface", config.interface)
         self._monitor = Monitor.create("monitor", self)
 
         self.analysis_port = pyuvm.uvm_analysis_port("analysis_port", self)

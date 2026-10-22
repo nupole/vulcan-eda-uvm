@@ -11,11 +11,10 @@ import vulcan_eda.uvm
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data)
-        pyuvm.ConfigDB().set(self, "upstream_agent", "interface", upstream_interface)
+        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.downstream_data)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "interface", downstream_interface)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "is_active", pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(downstream_interface, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 

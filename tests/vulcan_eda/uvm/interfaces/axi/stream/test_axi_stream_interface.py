@@ -16,10 +16,10 @@ from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacke
 class AxiStreamInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = AxiStreamInterface(cocotb.top.clk, cocotb.top.upstream_tready, cocotb.top.upstream_tvalid, cocotb.top.upstream_tdata, cocotb.top.upstream_tlast)
-        pyuvm.ConfigDB().set(self, "upstream_agent", "interface", upstream_interface)
+        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = AxiStreamInterface(cocotb.top.clk, cocotb.top.downstream_tready, cocotb.top.downstream_tvalid, cocotb.top.downstream_tdata, cocotb.top.downstream_tlast)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "interface", downstream_interface)
+        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(downstream_interface))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
