@@ -10,7 +10,7 @@ import pyuvm
 import vulcan_eda.uvm
 
 from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
-from vulcan_eda.uvm.interfaces.axi.stream import AxiStreamInterface, AxiStreamTransmitterInterface
+from vulcan_eda.uvm.interfaces.axi.stream import AxiStreamReceiverInterface, AxiStreamTransmitterInterface
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequence
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacket
 
@@ -21,7 +21,7 @@ class AxiStreamInterfaceEnv(pyuvm.uvm_env):
         pyuvm.ConfigDB().set(self, "upstream_agent.sequencer", "axi_stream_config", self.upstream_axi_stream_config)
         pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
-        downstream_interface = AxiStreamInterface(cocotb.top.clk, cocotb.top.downstream_tready, cocotb.top.downstream_tvalid, cocotb.top.downstream_tdata, cocotb.top.downstream_tlast)
+        downstream_interface = AxiStreamReceiverInterface(cocotb.top.clk, cocotb.top.downstream_tready, cocotb.top.downstream_tvalid, cocotb.top.downstream_tdata, cocotb.top.downstream_tlast)
         pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(downstream_interface))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
