@@ -2,3 +2,4 @@ from vulcan_eda.uvm.interfaces.data_interface import DataInterface
 from vulcan_eda.uvm.interfaces.valid_data_interface import ValidDataInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_interface import ReadyValidDataInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_transmitter_interface import ReadyValidDataTransmitterInterface
+from vulcan_eda.uvm.interfaces.ready_valid_data_receiver_interface import ReadyValidDataReceiverInterface
