@@ -26,7 +26,7 @@ class ValidDataInterfaceEnv(pyuvm.uvm_env):
 class ValidDataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = ValidDataInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "txn_pct", 50)
+        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
         self.random_valid_data_sequence = vulcan_eda.uvm.sequences.RandomValidDataSequence("random_valid_data_sequence")
 
     async def run_phase(self):

@@ -2,6 +2,7 @@ import random
 
 import pyuvm
 
+from vulcan_eda.uvm.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.sequences.transaction_sequence import TransactionSequence
 
 class DataSequenceItem(pyuvm.uvm_sequence_item):
@@ -10,23 +11,13 @@ class DataSequenceItem(pyuvm.uvm_sequence_item):
         self.data = data
 
 class RandomDataSequence(TransactionSequence):
-    @TransactionSequence.txn_pct.setter
-    def txn_pct(self, value):
-        if not (value == 100):
+    def _configure(self):
+        super()._configure()
+        if not (self.txn_pct == 100):
             raise ValueError("txn_pct must be 100")
-        self._txn_pct = value
-
-    @property
-    def max_data(self):
-        return self._max_data
-
-    @max_data.setter
-    def max_data(self, value):
-        if value < 0:
-            raise ValueError("max_data must be positive")
-        self._max_data = value
+        config = pyuvm.ConfigDB().get(self.sequencer, "", "random_data_sequence_config", RandomDataSequenceConfig())
+        self.max_data = config.max_data
 
     def _get_next_sequence_item(self, is_txn):
-        self.max_data = pyuvm.ConfigDB().get(self.sequencer, "", "max_data", 255)
-        data = random.randint(0, self._max_data)
+        data = random.randint(0, self.max_data)
         return DataSequenceItem('random_data_sequence_item', data)

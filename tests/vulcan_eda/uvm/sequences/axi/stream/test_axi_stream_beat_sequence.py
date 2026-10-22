@@ -5,6 +5,7 @@ import pyuvm
 
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequence
+from vulcan_eda.uvm.sequences.transaction_sequence_config import TransactionSequenceConfig
 
 class RecordingSequencer(pyuvm.uvm_sequencer):
     def __init__(self, name, parent):
@@ -39,18 +40,18 @@ def test_ends_with_idle(sequencer):
     assert not sequencer.items[-1].valid
 
 def test_inserts_idles_between_beats_in_order(sequencer):
-    pyuvm.ConfigDB().set(sequencer, "", "txn_pct", 50)
+    pyuvm.ConfigDB().set(sequencer, "", "transaction_sequence_config", TransactionSequenceConfig(txn_pct=50))
     valid_beats, idle_beats = run(sequencer, BEATS)
     assert valid_beats == BEATS
     assert len(idle_beats) > 1
 
 def test_idle_beats_randomize_last(sequencer):
-    pyuvm.ConfigDB().set(sequencer, "", "txn_pct", 50)
+    pyuvm.ConfigDB().set(sequencer, "", "transaction_sequence_config", TransactionSequenceConfig(txn_pct=50))
     _, idle_beats = run(sequencer, BEATS)
     assert {beat.last for beat in idle_beats} == {False, True}
 
 def test_idle_beats_fit_tdata(sequencer):
-    pyuvm.ConfigDB().set(sequencer, "", "txn_pct", 50)
+    pyuvm.ConfigDB().set(sequencer, "", "transaction_sequence_config", TransactionSequenceConfig(txn_pct=50))
     pyuvm.ConfigDB().set(sequencer, "", "tdata_bytes", 1)
     _, idle_beats = run(sequencer, BEATS)
     assert all(beat.data < 2 ** 8 for beat in idle_beats)

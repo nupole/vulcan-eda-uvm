@@ -31,9 +31,9 @@ class AxiStreamInterfaceEnv(pyuvm.uvm_env):
 class AxiStreamInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = AxiStreamInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "txn_pct", 50)
+        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
         pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "tdata_bytes", 4)
-        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "max_data", 1)
+        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "random_data_sequence_config", vulcan_eda.uvm.sequences.RandomDataSequenceConfig(max_data=1))
 
     async def run_phase(self):
         self.raise_objection()

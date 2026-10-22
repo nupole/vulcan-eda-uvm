@@ -26,8 +26,8 @@ class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
 class ReadyValidDataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = ReadyValidDataInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "txn_pct", 50)
-        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "txn_pct", 50)
+        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
+        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
 
     async def run_phase(self):
         self.raise_objection()
