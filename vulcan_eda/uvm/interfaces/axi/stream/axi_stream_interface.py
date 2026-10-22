@@ -26,8 +26,7 @@ class AxiStreamInterface(BaseInterface):
         await self._ready_valid_data_interface.put_ready(ready)
 
     async def put_beat(self, valid, beat):
-        await self._ready_valid_data_interface.put_valid_data(valid, (beat.data, beat.last))
+        await self._ready_valid_data_interface.put_valid_data(valid, beat.to_values())
 
     async def get(self):
-        data, last = await self._ready_valid_data_interface.get()
-        return AxiStreamBeat(int(data), bool(last))
+        return AxiStreamBeat.from_values(await self._ready_valid_data_interface.get())
