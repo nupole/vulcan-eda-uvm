@@ -9,6 +9,7 @@ import pyuvm
 
 import vulcan_eda.uvm
 
+from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
 from vulcan_eda.uvm.interfaces.axi.stream import AxiStreamInterface
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequence
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacket
@@ -16,6 +17,8 @@ from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacke
 class AxiStreamInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = AxiStreamInterface(cocotb.top.clk, cocotb.top.upstream_tready, cocotb.top.upstream_tvalid, cocotb.top.upstream_tdata, cocotb.top.upstream_tlast)
+        self.upstream_axi_stream_config = AxiStreamConfig(num_bytes=upstream_interface.num_bytes)
+        pyuvm.ConfigDB().set(self, "upstream_agent.sequencer", "axi_stream_config", self.upstream_axi_stream_config)
         pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = AxiStreamInterface(cocotb.top.clk, cocotb.top.downstream_tready, cocotb.top.downstream_tvalid, cocotb.top.downstream_tdata, cocotb.top.downstream_tlast)
@@ -32,7 +35,6 @@ class AxiStreamInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = AxiStreamInterfaceEnv("env", self)
         pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "tdata_bytes", 4)
         pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "random_data_sequence_config", vulcan_eda.uvm.sequences.RandomDataSequenceConfig(max_data=1))
 
     async def run_phase(self):
@@ -40,8 +42,8 @@ class AxiStreamInterfaceTest(pyuvm.uvm_test):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         cocotb.start_soon(self._drive_ready())
         for _ in range(4):
-            packet = AxiStreamPacket(random.randbytes(4 * random.randint(1, 16)))
-            axi_stream_beat_sequence = AxiStreamBeatSequence("axi_stream_beat_sequence", packet.to_beats(4))
+            packet = AxiStreamPacket(random.randbytes(self.env.upstream_axi_stream_config.num_bytes * random.randint(1, 16)))
+            axi_stream_beat_sequence = AxiStreamBeatSequence("axi_stream_beat_sequence", packet.to_beats(self.env.upstream_axi_stream_config.num_bytes))
             await axi_stream_beat_sequence.start(self.env.upstream_agent.sequencer)
         self.drop_objection()
 

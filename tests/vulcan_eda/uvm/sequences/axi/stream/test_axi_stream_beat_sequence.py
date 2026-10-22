@@ -3,6 +3,7 @@ import asyncio
 import pytest
 import pyuvm
 
+from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
 from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequence
 from vulcan_eda.uvm.sequences.transaction_sequence_config import TransactionSequenceConfig
@@ -20,7 +21,9 @@ class RecordingSequencer(pyuvm.uvm_sequencer):
 
 @pytest.fixture
 def sequencer():
-    yield RecordingSequencer("sequencer", None)
+    sequencer = RecordingSequencer("sequencer", None)
+    pyuvm.ConfigDB().set(sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
+    yield sequencer
     pyuvm.uvm_root.clear_singletons()
 
 def run(sequencer, beats):
@@ -52,6 +55,6 @@ def test_idle_beats_randomize_last(sequencer):
 
 def test_idle_beats_fit_tdata(sequencer):
     pyuvm.ConfigDB().set(sequencer, "", "transaction_sequence_config", TransactionSequenceConfig(txn_pct=50))
-    pyuvm.ConfigDB().set(sequencer, "", "tdata_bytes", 1)
+    pyuvm.ConfigDB().set(sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=1))
     _, idle_beats = run(sequencer, BEATS)
     assert all(beat.data < 2 ** 8 for beat in idle_beats)

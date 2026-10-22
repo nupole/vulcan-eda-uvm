@@ -20,7 +20,8 @@ class AxiStreamBeatSequence(TransactionSequence):
     def _configure(self):
         super()._configure()
         self.max_num_txn = len(self._beats)
-        self._num_bytes = pyuvm.ConfigDB().get(self.sequencer, "", "tdata_bytes", 4)
+        config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_stream_config")
+        self._num_bytes = config.num_bytes
 
     def _get_next_sequence_item(self, is_txn):
         if is_txn:
