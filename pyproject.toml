@@ -20,6 +20,7 @@ test = [
 [tool.setuptools]
 packages = ["vulcan_eda.uvm",
             "vulcan_eda.uvm.sequences",
+            "vulcan_eda.uvm.sequences.axi.stream",
             "vulcan_eda.uvm.interfaces",
             "vulcan_eda.uvm.drivers",
             "vulcan_eda.uvm.monitors",
