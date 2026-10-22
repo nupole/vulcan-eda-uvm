@@ -10,8 +10,14 @@ class DataInterface(BaseInterface):
 
     async def put_data(self, data):
         await self._write_edge()
-        self._data.value = data
+        self.write_data(data)
 
     async def get(self):
         await self._read_edge()
+        return self.read_data()
+
+    def read_data(self):
         return self._data.value
+
+    def write_data(self, data):
+        self._data.value = data

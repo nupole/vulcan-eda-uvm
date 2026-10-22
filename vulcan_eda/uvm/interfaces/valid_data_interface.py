@@ -1,5 +1,3 @@
-import cocotb
-
 from vulcan_eda.uvm.interfaces import DataInterface
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 
@@ -13,18 +11,19 @@ class ValidDataInterface(BaseInterface):
         await self.put_valid_data(sequence_item.valid, sequence_item.data)
 
     async def put_valid_data(self, valid, data):
-        valid_interface_task = cocotb.start_soon(self._valid_interface.put_data(valid))
-        data_interface_task = cocotb.start_soon(self._data_interface.put_data(data))
-        await cocotb.triggers.Combine(valid_interface_task, data_interface_task)
+        await self._write_edge()
+        self.write_valid_data(valid, data)
 
     async def get(self):
         while True:
-            valid, data = await self.get_valid_data()
+            await self._read_edge()
+            valid, data = self.read_valid_data()
             if valid == 1:
                 return data
 
-    async def get_valid_data(self):
-        valid_interface_task = cocotb.start_soon(self._valid_interface.get())
-        data_interface_task = cocotb.start_soon(self._data_interface.get())
-        await cocotb.triggers.Combine(valid_interface_task, data_interface_task)
-        return valid_interface_task.result(), data_interface_task.result()
+    def read_valid_data(self):
+        return self._valid_interface.read_data(), self._data_interface.read_data()
+
+    def write_valid_data(self, valid, data):
+        self._valid_interface.write_data(valid)
+        self._data_interface.write_data(data)
