@@ -5,6 +5,7 @@ from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 
 class ReadyValidDataInterface(BaseInterface):
     def __init__(self, clk, ready, valid, data):
+        super().__init__(clk)
         self._ready_interface = DataInterface(clk, ready)
         self._valid_data_interface = ValidDataInterface(clk, valid, data)
 
