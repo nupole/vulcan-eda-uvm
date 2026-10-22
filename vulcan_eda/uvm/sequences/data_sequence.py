@@ -16,8 +16,9 @@ class RandomDataSequence(TransactionSequence):
         if not (self.txn_pct == 100):
             raise ValueError("txn_pct must be 100")
         config = pyuvm.ConfigDB().get(self.sequencer, "", "random_data_sequence_config", RandomDataSequenceConfig())
+        self.min_data = config.min_data
         self.max_data = config.max_data
 
     def _get_next_sequence_item(self, is_txn):
-        data = random.randint(0, self.max_data)
+        data = random.randint(self.min_data, self.max_data)
         return DataSequenceItem('random_data_sequence_item', data)

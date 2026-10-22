@@ -23,10 +23,11 @@ class RandomValidDataSequence(ValidDataSequence):
     def _configure(self):
         super()._configure()
         config = pyuvm.ConfigDB().get(self.sequencer, "", "random_data_sequence_config", RandomDataSequenceConfig())
+        self.min_data = config.min_data
         self.max_data = config.max_data
 
     def _get_data(self):
         return self._get_random_data()
 
     def _get_random_data(self):
-        return random.randint(0, self.max_data)
+        return random.randint(self.min_data, self.max_data)
