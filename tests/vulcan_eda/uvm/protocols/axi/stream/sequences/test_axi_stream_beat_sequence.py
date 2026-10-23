@@ -26,7 +26,9 @@ def sequencer():
     return sequencer
 
 def run(sequencer, beats):
-    asyncio.run(AxiStreamBeatSequence("axi_stream_beat_sequence", beats).start(sequencer))
+    axi_stream_beat_sequence = AxiStreamBeatSequence.create("axi_stream_beat_sequence")
+    axi_stream_beat_sequence.beats = beats
+    asyncio.run(axi_stream_beat_sequence.start(sequencer))
     valid_beats = [item.data for item in sequencer.items if item.valid]
     idle_beats = [item.data for item in sequencer.items if not item.valid]
     return valid_beats, idle_beats
@@ -36,6 +38,13 @@ BEATS = [AxiStreamBeat(beat, beat == 63) for beat in range(64)]
 def test_sends_beats_in_order(sequencer):
     valid_beats, _ = run(sequencer, BEATS)
     assert valid_beats == BEATS
+
+def test_restart_sends_beats_again(sequencer):
+    axi_stream_beat_sequence = AxiStreamBeatSequence.create("axi_stream_beat_sequence")
+    axi_stream_beat_sequence.beats = BEATS
+    asyncio.run(axi_stream_beat_sequence.start(sequencer))
+    asyncio.run(axi_stream_beat_sequence.start(sequencer))
+    assert [item.data for item in sequencer.items if item.valid] == BEATS + BEATS
 
 def test_ends_with_idle(sequencer):
     run(sequencer, BEATS)

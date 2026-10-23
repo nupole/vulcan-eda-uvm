@@ -8,12 +8,13 @@ from vulcan_eda.uvm.sequences.transaction_sequence import TransactionSequence
 from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequenceItem
 
 class AxiStreamBeatSequence(TransactionSequence):
-    def __init__(self, name, beats):
+    def __init__(self, name):
         super().__init__(name)
-        self._beats = collections.deque(beats)
+        self.beats = []
 
     def _configure(self):
         super()._configure()
+        self._beats = collections.deque(self.beats)
         self.max_num_txn = len(self._beats)
         config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_stream_config")
         self._num_bytes = config.num_bytes

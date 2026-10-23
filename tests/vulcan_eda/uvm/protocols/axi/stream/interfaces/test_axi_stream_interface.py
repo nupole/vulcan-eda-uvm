@@ -43,7 +43,8 @@ class AxiStreamInterfaceTest(pyuvm.uvm_test):
         cocotb.start_soon(self._drive_ready())
         for _ in range(4):
             packet = AxiStreamPacket(random.randbytes(self.env.upstream_axi_stream_config.num_bytes * random.randint(1, 16)))
-            axi_stream_beat_sequence = AxiStreamBeatSequence("axi_stream_beat_sequence", packet.to_beats(self.env.upstream_axi_stream_config.num_bytes))
+            axi_stream_beat_sequence = AxiStreamBeatSequence.create("axi_stream_beat_sequence")
+            axi_stream_beat_sequence.beats = packet.to_beats(self.env.upstream_axi_stream_config.num_bytes)
             await axi_stream_beat_sequence.start(self.env.upstream_agent.sequencer)
         self.drop_objection()
 
