@@ -35,6 +35,14 @@ class UpperSequencer:
     def item_done(self):
         self.done_items.append(self._current_item)
 
+class RecordingSubscriber(pyuvm.uvm_subscriber):
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.items = []
+
+    def write(self, item):
+        self.items.append(item)
+
 @pytest.fixture(autouse=True)
 def reset_pyuvm():
     yield
@@ -52,3 +60,7 @@ def recording_sequencer():
 @pytest.fixture
 def upper_sequencer():
     return UpperSequencer()
+
+@pytest.fixture
+def recording_subscriber():
+    return RecordingSubscriber("recording_subscriber", None)
