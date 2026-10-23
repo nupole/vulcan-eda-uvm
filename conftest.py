@@ -6,9 +6,10 @@ import pyuvm
 ROOT_DIR = pathlib.Path(__file__).parent
 
 @pytest.fixture(autouse=True)
-def clear_singletons():
+def reset_pyuvm():
     yield
     pyuvm.uvm_root.clear_singletons()
+    pyuvm.uvm_factory().clear_overrides()
 
 @pytest.fixture
 def build_dir(request):

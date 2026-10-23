@@ -46,11 +46,6 @@ class CountingBeatSequence(AxiStreamBeatSequence):
         CountingBeatSequence.starts += 1
         await super().body()
 
-@pytest.fixture
-def factory():
-    yield pyuvm.uvm_factory()
-    pyuvm.uvm_factory().clear_overrides()
-
 PACKETS = [AxiStreamPacket(bytes(range(8))), AxiStreamPacket(bytes(range(8, 12)))]
 
 def run(packets):
@@ -72,8 +67,8 @@ def test_finishes_each_packet():
     _, upper_sequencer = run(PACKETS)
     assert [item.data for item in upper_sequencer.done_items] == PACKETS
 
-def test_beat_sequence_can_be_overridden(factory):
-    factory.set_type_override_by_type(AxiStreamBeatSequence, CountingBeatSequence)
+def test_beat_sequence_can_be_overridden():
+    pyuvm.uvm_factory().set_type_override_by_type(AxiStreamBeatSequence, CountingBeatSequence)
     CountingBeatSequence.starts = 0
     run(PACKETS)
     assert CountingBeatSequence.starts == len(PACKETS)
