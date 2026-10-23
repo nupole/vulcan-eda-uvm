@@ -2,8 +2,11 @@ from vulcan_eda.uvm.interfaces import DataInterface, ValidDataInterface
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 
 class ReadyValidDataInterface(BaseInterface):
-    def __init__(self, clk, ready, valid, data):
+    def __init__(self, clk, ready, valid, data, data_type=None):
         super().__init__(clk)
+        self._data_type = data_type
+        if data_type is not None:
+            data = data_type.signals(**data)
         self._ready_interface = DataInterface(clk, ready)
         self._valid_data_interface = ValidDataInterface(clk, valid, data)
 
@@ -23,4 +26,6 @@ class ReadyValidDataInterface(BaseInterface):
                 return data
 
     def _from_values(self, values):
-        return values
+        if self._data_type is None:
+            return values
+        return self._data_type.from_values(values)

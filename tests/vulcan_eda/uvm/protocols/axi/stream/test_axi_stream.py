@@ -11,9 +11,10 @@ import vulcan_eda.uvm
 from vulcan_eda.uvm.configs.agents import AgentConfig
 from vulcan_eda.uvm.configs.layers import TranslationLayerConfig
 from vulcan_eda.uvm.configs.sequences import RandomDataSequenceConfig, TransactionSequenceConfig
+from vulcan_eda.uvm.interfaces import ReadyValidDataReceiverInterface, ReadyValidDataTransmitterInterface
 from vulcan_eda.uvm.layers import TranslationLayer
 from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
-from vulcan_eda.uvm.protocols.axi.stream.interfaces import AxiStreamReceiverInterface, AxiStreamTransmitterInterface
+from vulcan_eda.uvm.protocols.axi.stream.data import AxiStreamBeat
 from vulcan_eda.uvm.protocols.axi.stream.sequences import AxiStreamPacketToBeatSequence, RandomAxiStreamPacketSequence
 from vulcan_eda.uvm.protocols.axi.stream.subscribers import AxiStreamBeatToPacketSubscriber
 
@@ -26,14 +27,14 @@ class RecordingRandomAxiStreamPacketSequence(RandomAxiStreamPacketSequence):
 class AxiStreamEnv(pyuvm.uvm_env):
     def build_phase(self):
         dut = cocotb.top
-        upstream_interface = AxiStreamTransmitterInterface(dut.clk, dut.upstream_tready, dut.upstream_tvalid, dut.upstream_tdata, dut.upstream_tlast)
+        upstream_interface = ReadyValidDataTransmitterInterface(dut.clk, dut.upstream_tready, dut.upstream_tvalid, {"data": dut.upstream_tdata, "last": dut.upstream_tlast}, AxiStreamBeat)
         pyuvm.ConfigDB().set(self, "upstream_agent", "config", AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         pyuvm.ConfigDB().set(self, "upstream_layer", "config", TranslationLayerConfig(
             translation_sequence_type=AxiStreamPacketToBeatSequence,
             forwarded_configs={"axi_stream_config": AxiStreamConfig.from_tdata(dut.upstream_tdata)}))
         self.upstream_layer = TranslationLayer.create("upstream_layer", self)
-        downstream_interface = AxiStreamReceiverInterface(dut.clk, dut.downstream_tready, dut.downstream_tvalid, dut.downstream_tdata, dut.downstream_tlast)
+        downstream_interface = ReadyValidDataReceiverInterface(dut.clk, dut.downstream_tready, dut.downstream_tvalid, {"data": dut.downstream_tdata, "last": dut.downstream_tlast}, AxiStreamBeat)
         pyuvm.ConfigDB().set(self, "downstream_agent", "config", AgentConfig(downstream_interface))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         pyuvm.ConfigDB().set(self, "downstream_layer", "config", TranslationLayerConfig(

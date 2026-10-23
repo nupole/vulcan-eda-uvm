@@ -10,4 +10,6 @@ class ReadyValidDataTransmitterInterface(ReadyValidDataInterface):
             await self._is_consumed()
 
     def _to_values(self, data):
-        return data
+        if self._data_type is None:
+            return data
+        return data.to_values()

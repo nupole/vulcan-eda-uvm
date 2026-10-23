@@ -1,12 +1,51 @@
 import pathlib
+import types
 
 import cocotb
 import cocotb.clock
 import cocotb_tools.runner
 
+import pytest
 import pyuvm
 
 import vulcan_eda.uvm
+
+class Pair:
+    def __init__(self, first, second):
+        self.first = first
+        self.second = second
+
+    @classmethod
+    def signals(cls, first, second):
+        return vulcan_eda.uvm.signals.Bundle(first, second)
+
+    def to_values(self):
+        return (self.first, self.second)
+
+    @classmethod
+    def from_values(cls, values):
+        return cls(*values)
+
+def signal(value):
+    return types.SimpleNamespace(value=value)
+
+def test_data_type_builds_data_from_named_pins():
+    receiver_interface = vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface(None, signal(1), signal(1), {"second": signal(2), "first": signal(1)}, Pair)
+    assert receiver_interface.read_ready_valid_data() == (1, 1, (1, 2))
+
+def test_data_type_rejects_unknown_pins():
+    with pytest.raises(TypeError):
+        vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface(None, signal(1), signal(1), {"first": signal(1), "third": signal(3)}, Pair)
+
+def test_data_type_converts_values():
+    transmitter_interface = vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(None, signal(1), signal(1), {"first": signal(1), "second": signal(2)}, Pair)
+    assert transmitter_interface._to_values(Pair(1, 2)) == (1, 2)
+    assert vars(transmitter_interface._from_values((1, 2))) == vars(Pair(1, 2))
+
+def test_no_data_type_passes_values_through():
+    transmitter_interface = vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(None, signal(1), signal(1), signal(2))
+    assert transmitter_interface._to_values(2) == 2
+    assert transmitter_interface._from_values(2) == 2
 
 class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):

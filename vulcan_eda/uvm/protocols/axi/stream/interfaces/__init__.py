@@ -1,2 +1,0 @@
-from vulcan_eda.uvm.protocols.axi.stream.interfaces.axi_stream_transmitter_interface import AxiStreamTransmitterInterface
-from vulcan_eda.uvm.protocols.axi.stream.interfaces.axi_stream_receiver_interface import AxiStreamReceiverInterface
