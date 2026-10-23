@@ -1,9 +1,12 @@
 import pyuvm
 
 class TranslationSequence(pyuvm.uvm_sequence):
+    channels = ()
+
     def __init__(self, name):
         super().__init__(name)
         self.upper_sequencer = None
+        self.lower_sequencers = {}
 
     async def body(self):
         while True:

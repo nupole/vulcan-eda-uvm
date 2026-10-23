@@ -17,11 +17,12 @@ class RecordingSequencer(pyuvm.uvm_sequencer):
     async def finish_item(self, item):
         self.items.append(item)
 
-class UpperSequencer:
+class UpperSequencer(pyuvm.uvm_component):
     class Drained(Exception):
         pass
 
-    def __init__(self):
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
         self.items = collections.deque()
         self.done_items = []
         self.seq_item_export = self
@@ -59,7 +60,7 @@ def recording_sequencer():
 
 @pytest.fixture
 def upper_sequencer():
-    return UpperSequencer()
+    return UpperSequencer("upper_sequencer", None)
 
 @pytest.fixture
 def recording_subscriber():

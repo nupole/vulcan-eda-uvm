@@ -43,8 +43,8 @@ class AxiStreamEnv(pyuvm.uvm_env):
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
     def connect_phase(self):
-        self.upstream_layer.lower_sequencer = self.upstream_agent.sequencer
-        self.downstream_agent.analysis_port.connect(self.downstream_layer.analysis_export)
+        self.upstream_layer.lower_sequencers["stream"] = self.upstream_agent.sequencer
+        self.downstream_agent.analysis_port.connect(self.downstream_layer.analysis_exports["stream"])
         self.downstream_layer.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()

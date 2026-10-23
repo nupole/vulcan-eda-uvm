@@ -4,8 +4,10 @@ from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_beat_sequence impo
 from vulcan_eda.uvm.sequences.translation_sequence import TranslationSequence
 
 class AxiStreamPacketToBeatSequence(TranslationSequence):
+    channels = ("stream",)
+
     async def _translate(self, upper_item):
-        config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_stream_config")
+        config = pyuvm.ConfigDB().get(self.upper_sequencer, "", "axi_stream_config")
         axi_stream_beat_sequence = AxiStreamBeatSequence.create("axi_stream_beat_sequence")
         axi_stream_beat_sequence.beats = upper_item.data.to_beats(config.num_bytes)
-        await axi_stream_beat_sequence.start(self.sequencer)
+        await axi_stream_beat_sequence.start(self.lower_sequencers["stream"])

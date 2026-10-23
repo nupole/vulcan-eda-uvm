@@ -19,12 +19,14 @@ class CountingBeatSequence(AxiStreamBeatSequence):
 PACKETS = [AxiStreamPacket(bytes(range(8))), AxiStreamPacket(bytes(range(8, 12)))]
 
 def run(sequencer, upper_sequencer, packets):
-    pyuvm.ConfigDB().set(sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
+    for component in (sequencer, upper_sequencer):
+        pyuvm.ConfigDB().set(component, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
     upper_sequencer.items.extend(DataSequenceItem("packet", packet) for packet in packets)
     axi_stream_packet_to_beat_sequence = AxiStreamPacketToBeatSequence.create("axi_stream_packet_to_beat_sequence")
     axi_stream_packet_to_beat_sequence.upper_sequencer = upper_sequencer
+    axi_stream_packet_to_beat_sequence.lower_sequencers = {"stream": sequencer}
     with pytest.raises(upper_sequencer.Drained):
-        asyncio.run(axi_stream_packet_to_beat_sequence.start(sequencer))
+        asyncio.run(axi_stream_packet_to_beat_sequence.start())
 
 def test_sends_each_packet_as_beats(recording_sequencer, upper_sequencer):
     run(recording_sequencer, upper_sequencer, PACKETS)

@@ -16,14 +16,14 @@ def build(recording_subscriber):
 
 def test_publishes_nothing_before_last(recording_subscriber):
     axi_stream_beat_to_packet_subscriber = build(recording_subscriber)
-    axi_stream_beat_to_packet_subscriber.analysis_export.write(PACKETS[0].to_beats(4)[0])
+    axi_stream_beat_to_packet_subscriber.analysis_exports["stream"].write(PACKETS[0].to_beats(4)[0])
     assert recording_subscriber.items == []
 
 def test_publishes_each_packet_at_last(recording_subscriber):
     axi_stream_beat_to_packet_subscriber = build(recording_subscriber)
     for packet in PACKETS:
         for beat in packet.to_beats(4):
-            axi_stream_beat_to_packet_subscriber.analysis_export.write(beat)
+            axi_stream_beat_to_packet_subscriber.analysis_exports["stream"].write(beat)
     assert recording_subscriber.items == PACKETS
 
 def test_requires_axi_stream_config():
