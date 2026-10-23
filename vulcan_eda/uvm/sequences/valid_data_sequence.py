@@ -31,3 +31,20 @@ class RandomValidDataSequence(ValidDataSequence):
 
     def _get_random_data(self):
         return random.randint(self.min_data, self.max_data)
+
+class IterableValidDataSequence(TransactionSequence):
+    iterable = ()
+
+    def _configure(self):
+        super()._configure()
+        data = list(self.iterable)
+        if not data:
+            raise ValueError("iterable must not be empty")
+        self.max_num_txn = len(data)
+        self._iterator = iter(data)
+        self._data = data[0]
+
+    def _get_next_sequence_item(self, is_txn):
+        if is_txn:
+            self._data = next(self._iterator)
+        return ValidDataSequenceItem('iterable_valid_data_sequence_item', is_txn, self._data)
