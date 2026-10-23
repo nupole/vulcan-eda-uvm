@@ -1,0 +1,1 @@
+from vulcan_eda.uvm.protocols.axi.stream.subscribers.axi_stream_beat_to_packet_subscriber import AxiStreamBeatToPacketSubscriber

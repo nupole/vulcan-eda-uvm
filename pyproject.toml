@@ -37,7 +37,8 @@ packages = ["vulcan_eda.uvm",
             "vulcan_eda.uvm.protocols.axi.stream.configs",
             "vulcan_eda.uvm.protocols.axi.stream.configs.sequences",
             "vulcan_eda.uvm.protocols.axi.stream.interfaces",
-            "vulcan_eda.uvm.protocols.axi.stream.sequences"]
+            "vulcan_eda.uvm.protocols.axi.stream.sequences",
+            "vulcan_eda.uvm.protocols.axi.stream.subscribers"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
