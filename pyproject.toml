@@ -20,15 +20,17 @@ test = [
 [tool.setuptools]
 packages = ["vulcan_eda.uvm",
             "vulcan_eda.uvm.sequences",
-            "vulcan_eda.uvm.sequences.axi.stream",
             "vulcan_eda.uvm.signals",
-            "vulcan_eda.uvm.configs.axi.stream",
             "vulcan_eda.uvm.interfaces",
-            "vulcan_eda.uvm.interfaces.axi.stream",
             "vulcan_eda.uvm.drivers",
             "vulcan_eda.uvm.monitors",
             "vulcan_eda.uvm.agents",
-            "vulcan_eda.uvm.scoreboards"]
+            "vulcan_eda.uvm.scoreboards",
+            "vulcan_eda.uvm.protocols.axi.stream",
+            "vulcan_eda.uvm.protocols.axi.stream.data",
+            "vulcan_eda.uvm.protocols.axi.stream.configs",
+            "vulcan_eda.uvm.protocols.axi.stream.interfaces",
+            "vulcan_eda.uvm.protocols.axi.stream.sequences"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,5 +1,5 @@
 from vulcan_eda.uvm.interfaces.ready_valid_data_transmitter_interface import ReadyValidDataTransmitterInterface
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBeat
 from vulcan_eda.uvm.signals import Bundle
 
 class AxiStreamTransmitterInterface(ReadyValidDataTransmitterInterface):

@@ -9,10 +9,10 @@ import pyuvm
 
 import vulcan_eda.uvm
 
-from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
-from vulcan_eda.uvm.interfaces.axi.stream import AxiStreamReceiverInterface, AxiStreamTransmitterInterface
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequence
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacket
+from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
+from vulcan_eda.uvm.protocols.axi.stream.interfaces import AxiStreamReceiverInterface, AxiStreamTransmitterInterface
+from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_beat_sequence import AxiStreamBeatSequence
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 
 class AxiStreamInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):

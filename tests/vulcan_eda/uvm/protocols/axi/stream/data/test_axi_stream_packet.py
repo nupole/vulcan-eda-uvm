@@ -1,7 +1,7 @@
 import pytest
 
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_packet import AxiStreamPacket
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBeat
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 
 def test_to_beats_single_beat():
     assert AxiStreamPacket(bytes(range(4))).to_beats(4) == [AxiStreamBeat(0x03020100, True)]

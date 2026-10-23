@@ -3,9 +3,9 @@ import asyncio
 import pytest
 import pyuvm
 
-from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat_sequence import AxiStreamBeatSequence
+from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBeat
+from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_beat_sequence import AxiStreamBeatSequence
 from vulcan_eda.uvm.sequences.transaction_sequence_config import TransactionSequenceConfig
 
 class RecordingSequencer(pyuvm.uvm_sequencer):

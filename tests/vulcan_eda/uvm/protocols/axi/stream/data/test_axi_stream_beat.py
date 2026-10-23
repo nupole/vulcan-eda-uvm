@@ -1,6 +1,6 @@
 import cocotb.types
 
-from vulcan_eda.uvm.sequences.axi.stream.axi_stream_beat import AxiStreamBeat
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBeat
 
 def test_to_values():
     assert AxiStreamBeat(0x12, True).to_values() == (0x12, True)

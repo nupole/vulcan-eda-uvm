@@ -1,7 +1,7 @@
 import cocotb.types
 import pytest
 
-from vulcan_eda.uvm.configs.axi.stream import AxiStreamConfig
+from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
 
 def test_num_bytes():
     assert AxiStreamConfig(num_bytes=4).num_bytes == 4
