@@ -23,8 +23,7 @@ class RecordingSequencer(pyuvm.uvm_sequencer):
 def sequencer():
     sequencer = RecordingSequencer("sequencer", None)
     pyuvm.ConfigDB().set(sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
-    yield sequencer
-    pyuvm.uvm_root.clear_singletons()
+    return sequencer
 
 def run(sequencer, beats):
     asyncio.run(AxiStreamBeatSequence("axi_stream_beat_sequence", beats).start(sequencer))

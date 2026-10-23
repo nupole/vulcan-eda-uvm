@@ -4,11 +4,6 @@ import pyuvm
 from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.sequences.valid_data_sequence import RandomValidDataSequence
 
-@pytest.fixture(autouse=True)
-def clear_singletons():
-    yield
-    pyuvm.uvm_root.clear_singletons()
-
 @pytest.mark.parametrize("is_txn", [True, False])
 def test_random_valid_data_sequence_uses_min_data(is_txn):
     pyuvm.ConfigDB().set(None, "", "random_data_sequence_config", RandomDataSequenceConfig(min_data=-5, max_data=-5))
