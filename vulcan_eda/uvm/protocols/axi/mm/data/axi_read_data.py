@@ -1,6 +1,8 @@
 import dataclasses
 
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_response import AxiResponse
+from vulcan_eda.uvm.signals.bundle import Bundle
+from vulcan_eda.uvm.signals.constant import Constant
 
 @dataclasses.dataclass(frozen=True)
 class AxiReadData:
@@ -8,6 +10,10 @@ class AxiReadData:
     response: AxiResponse
     last: bool = True
     id: int = 0
+
+    @classmethod
+    def signals(cls, data, response, id=Constant(0), last=Constant(1)):
+        return Bundle(id, data, response, last)
 
     def to_values(self):
         return (self.id, self.data, self.response.value, self.last)
