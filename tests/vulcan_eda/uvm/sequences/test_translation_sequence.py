@@ -1,51 +1,25 @@
 import asyncio
-import collections
 
 import pytest
 
 from vulcan_eda.uvm.sequences.translation_sequence import TranslationSequence
 
-class Drained(Exception):
-    pass
-
-class UpperSequencer:
-    def __init__(self, items, log):
-        self._items = collections.deque(items)
-        self._log = log
-        self.seq_item_export = self
-
-    async def get_next_item(self):
-        if not self._items:
-            raise Drained()
-        self._current_item = self._items.popleft()
-        return self._current_item
-
-    def item_done(self):
-        self._log.append(("item_done", self._current_item))
-
 class RecordingTranslationSequence(TranslationSequence):
-    def __init__(self, name, log):
+    def __init__(self, name):
         super().__init__(name)
-        self._log = log
+        self.translations = []
 
     async def _translate(self, upper_item):
-        self._log.append(("translate", upper_item))
+        self.translations.append((upper_item, list(self.upper_sequencer.done_items)))
 
-def run(items):
-    log = []
-    translation_sequence = RecordingTranslationSequence("translation_sequence", log)
-    translation_sequence.upper_sequencer = UpperSequencer(items, log)
-    with pytest.raises(Drained):
+def test_translates_each_item_before_item_done(upper_sequencer):
+    upper_sequencer.items.extend(["a", "b"])
+    translation_sequence = RecordingTranslationSequence("translation_sequence")
+    translation_sequence.upper_sequencer = upper_sequencer
+    with pytest.raises(upper_sequencer.Drained):
         asyncio.run(translation_sequence.body())
-    return log
-
-def test_translates_each_item_before_item_done():
-    assert run(["a", "b"]) == [
-        ("translate", "a"),
-        ("item_done", "a"),
-        ("translate", "b"),
-        ("item_done", "b"),
-    ]
+    assert translation_sequence.translations == [("a", []), ("b", ["a"])]
+    assert upper_sequencer.done_items == ["a", "b"]
 
 def test_translate_must_be_overridden():
     translation_sequence = TranslationSequence("translation_sequence")

@@ -8,22 +8,10 @@ from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
 from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBeat
 from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_beat_sequence import AxiStreamBeatSequence
 
-class RecordingSequencer(pyuvm.uvm_sequencer):
-    def __init__(self, name, parent):
-        super().__init__(name, parent)
-        self.items = []
-
-    async def start_item(self, item):
-        pass
-
-    async def finish_item(self, item):
-        self.items.append(item)
-
 @pytest.fixture
-def sequencer():
-    sequencer = RecordingSequencer("sequencer", None)
-    pyuvm.ConfigDB().set(sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
-    return sequencer
+def sequencer(recording_sequencer):
+    pyuvm.ConfigDB().set(recording_sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
+    return recording_sequencer
 
 def run(sequencer, beats):
     axi_stream_beat_sequence = AxiStreamBeatSequence.create("axi_stream_beat_sequence")
