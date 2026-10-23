@@ -13,5 +13,7 @@ class Scoreboard(pyuvm.uvm_scoreboard):
                 raise AssertionError(f'Actual data ({actual_data}) does not equal expected data ({expected_data})!')
 
     def check_phase(self):
-        if self.actual_data_analysis_fifo.size() > 0:
+        if not self.actual_data_analysis_fifo.is_empty():
             raise AssertionError('Actual data analysis fifo is not empty!')
+        if not self.expected_data_analysis_fifo.is_empty():
+            raise AssertionError('Expected data analysis fifo is not empty!')
