@@ -1,7 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity test_axi_stream_interface is
+entity test_axi_stream is
     port(clk:               in  std_logic;
          upstream_tready:   out std_logic;
          upstream_tvalid:   in  std_logic;
@@ -13,7 +13,7 @@ entity test_axi_stream_interface is
          downstream_tlast:  out std_logic);
 end entity;
 
-architecture rtl of test_axi_stream_interface is
+architecture rtl of test_axi_stream is
 begin
     upstream_tready   <= downstream_tready;
     downstream_tvalid <= upstream_tvalid;
