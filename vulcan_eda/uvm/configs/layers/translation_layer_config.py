@@ -16,3 +16,5 @@ class TranslationLayerConfig:
             raise TypeError("translation_sequence_type must be a TranslationSequence")
         if self.translation_subscriber_type is not None and not issubclass(self.translation_subscriber_type, TranslationSubscriber):
             raise TypeError("translation_subscriber_type must be a TranslationSubscriber")
+        if self.translation_sequence_type is not None and self.translation_sequence_type.uses_responses and self.translation_subscriber_type is None:
+            raise ValueError("translation_sequence_type uses responses, so translation_subscriber_type must be set")

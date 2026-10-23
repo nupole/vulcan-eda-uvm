@@ -31,6 +31,13 @@ def test_rejects_non_translation_subscriber_type():
     with pytest.raises(TypeError):
         TranslationLayerConfig(translation_subscriber_type=object)
 
+def test_rejects_response_using_sequence_without_subscriber():
+    class ResponseUsingTranslationSequence(TranslationSequence):
+        uses_responses = True
+
+    with pytest.raises(ValueError):
+        TranslationLayerConfig(translation_sequence_type=ResponseUsingTranslationSequence)
+
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         TranslationLayerConfig(TranslationSequence)

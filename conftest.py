@@ -25,6 +25,7 @@ class UpperSequencer(pyuvm.uvm_component):
         super().__init__(name, parent)
         self.items = collections.deque()
         self.done_items = []
+        self.responses = []
         self.seq_item_export = self
 
     async def get_next_item(self):
@@ -33,8 +34,10 @@ class UpperSequencer(pyuvm.uvm_component):
         self._current_item = self.items.popleft()
         return self._current_item
 
-    def item_done(self):
+    def item_done(self, rsp=None):
         self.done_items.append(self._current_item)
+        if rsp is not None:
+            self.responses.append(rsp)
 
 class RecordingSubscriber(pyuvm.uvm_subscriber):
     def __init__(self, name, parent):

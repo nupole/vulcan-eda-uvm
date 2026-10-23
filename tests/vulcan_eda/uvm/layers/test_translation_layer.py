@@ -13,7 +13,10 @@ class StartRecordingTranslationSequence(TranslationSequence):
     starts = []
 
     async def body(self):
-        StartRecordingTranslationSequence.starts.append((self.upper_sequencer, self.lower_sequencers))
+        StartRecordingTranslationSequence.starts.append((self.upper_sequencer, self.lower_sequencers, self.responses))
+
+class ResponseUsingTranslationSequence(StartRecordingTranslationSequence):
+    uses_responses = True
 
 class DoublingTranslationSubscriber(TranslationSubscriber):
     channels = ("lower",)
@@ -67,7 +70,7 @@ def test_starts_translation_with_its_sequencers(recording_sequencer):
     translation_layer = build_stimulus()
     translation_layer.lower_sequencers["lower"] = recording_sequencer
     asyncio.run(translation_layer.run_phase())
-    assert StartRecordingTranslationSequence.starts == [(translation_layer.sequencer, {"lower": recording_sequencer})]
+    assert StartRecordingTranslationSequence.starts == [(translation_layer.sequencer, {"lower": recording_sequencer}, None)]
 
 def test_translation_sequence_can_be_overridden():
     StartRecordingTranslationSequence.starts = []
@@ -84,6 +87,27 @@ def test_publishes_translated_items(recording_subscriber):
     translation_layer = build_monitoring(recording_subscriber)
     translation_layer.analysis_exports["lower"].write("a")
     assert recording_subscriber.items == ["a", "a"]
+
+def build_both_directions(translation_sequence_type=ResponseUsingTranslationSequence):
+    translation_layer = build(translation_sequence_type=translation_sequence_type, translation_subscriber_type=DoublingTranslationSubscriber)
+    translation_layer.subscriber.build_phase()
+    translation_layer.connect_phase()
+    return translation_layer
+
+def test_collects_translated_items_as_responses():
+    translation_layer = build_both_directions()
+    translation_layer.analysis_exports["lower"].write("a")
+    assert translation_layer.responses.used() == 2
+
+def test_has_no_responses_when_translation_does_not_use_them():
+    assert build_both_directions(StartRecordingTranslationSequence).responses is None
+
+def test_hands_responses_to_translation_sequence(recording_sequencer):
+    StartRecordingTranslationSequence.starts = []
+    translation_layer = build_both_directions()
+    translation_layer.lower_sequencers["lower"] = recording_sequencer
+    asyncio.run(translation_layer.run_phase())
+    assert StartRecordingTranslationSequence.starts[0][2] is translation_layer.responses
 
 def test_monitoring_only_needs_no_lower_sequencers(recording_subscriber):
     translation_layer = build_monitoring(recording_subscriber)
