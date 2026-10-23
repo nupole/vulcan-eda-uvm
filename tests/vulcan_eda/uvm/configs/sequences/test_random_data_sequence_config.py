@@ -1,6 +1,6 @@
 import pytest
 
-from vulcan_eda.uvm.sequences.random_data_sequence_config import RandomDataSequenceConfig
+from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 
 def test_defaults():
     assert RandomDataSequenceConfig() == RandomDataSequenceConfig(min_data=0, max_data=255)

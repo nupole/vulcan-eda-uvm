@@ -11,10 +11,10 @@ import vulcan_eda.uvm
 class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(cocotb.top.clk, cocotb.top.upstream_ready, cocotb.top.upstream_valid, cocotb.top.upstream_data)
-        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
+        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface(cocotb.top.clk, cocotb.top.downstream_ready, cocotb.top.downstream_valid, cocotb.top.downstream_data)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(downstream_interface))
+        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
@@ -26,8 +26,8 @@ class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
 class ReadyValidDataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = ReadyValidDataInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
-        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
+        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.configs.sequences.TransactionSequenceConfig(txn_pct=50))
+        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.configs.sequences.TransactionSequenceConfig(txn_pct=50))
 
     async def run_phase(self):
         self.raise_objection()

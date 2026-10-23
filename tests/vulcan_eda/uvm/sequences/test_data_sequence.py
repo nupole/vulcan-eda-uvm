@@ -1,8 +1,8 @@
 import pytest
 import pyuvm
 
+from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.sequences.data_sequence import RandomDataSequence
-from vulcan_eda.uvm.sequences.random_data_sequence_config import RandomDataSequenceConfig
 
 @pytest.fixture(autouse=True)
 def clear_singletons():

@@ -1,6 +1,6 @@
 import pytest
 
-from vulcan_eda.uvm.sequences.transaction_sequence_config import TransactionSequenceConfig
+from vulcan_eda.uvm.configs.sequences.transaction_sequence_config import TransactionSequenceConfig
 
 def test_defaults():
     assert TransactionSequenceConfig() == TransactionSequenceConfig(txn_pct=100, max_num_txn=10)

@@ -10,19 +10,19 @@ import pyuvm
 import vulcan_eda.uvm
 
 from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
+from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 from vulcan_eda.uvm.protocols.axi.stream.interfaces import AxiStreamReceiverInterface, AxiStreamTransmitterInterface
 from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_beat_sequence import AxiStreamBeatSequence
-from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 
 class AxiStreamInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = AxiStreamTransmitterInterface(cocotb.top.clk, cocotb.top.upstream_tready, cocotb.top.upstream_tvalid, cocotb.top.upstream_tdata, cocotb.top.upstream_tlast)
         self.upstream_axi_stream_config = AxiStreamConfig.from_tdata(cocotb.top.upstream_tdata)
         pyuvm.ConfigDB().set(self, "upstream_agent.sequencer", "axi_stream_config", self.upstream_axi_stream_config)
-        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(upstream_interface))
+        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface))
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = AxiStreamReceiverInterface(cocotb.top.clk, cocotb.top.downstream_tready, cocotb.top.downstream_tvalid, cocotb.top.downstream_tdata, cocotb.top.downstream_tlast)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.agents.AgentConfig(downstream_interface))
+        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
@@ -34,8 +34,8 @@ class AxiStreamInterfaceEnv(pyuvm.uvm_env):
 class AxiStreamInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = AxiStreamInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.sequences.TransactionSequenceConfig(txn_pct=50))
-        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "random_data_sequence_config", vulcan_eda.uvm.sequences.RandomDataSequenceConfig(max_data=1))
+        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.configs.sequences.TransactionSequenceConfig(txn_pct=50))
+        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "random_data_sequence_config", vulcan_eda.uvm.configs.sequences.RandomDataSequenceConfig(max_data=1))
 
     async def run_phase(self):
         self.raise_objection()

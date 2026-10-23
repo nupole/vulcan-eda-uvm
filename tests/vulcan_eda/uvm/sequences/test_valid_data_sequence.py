@@ -1,7 +1,7 @@
 import pytest
 import pyuvm
 
-from vulcan_eda.uvm.sequences.random_data_sequence_config import RandomDataSequenceConfig
+from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.sequences.valid_data_sequence import RandomValidDataSequence
 
 @pytest.fixture(autouse=True)

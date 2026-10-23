@@ -2,7 +2,7 @@ import random
 
 import pyuvm
 
-from vulcan_eda.uvm.sequences.random_data_sequence_config import RandomDataSequenceConfig
+from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.sequences.transaction_sequence import TransactionSequence
 
 class DataSequenceItem(pyuvm.uvm_sequence_item):

@@ -2,7 +2,7 @@ import random
 
 import pyuvm
 
-from vulcan_eda.uvm.sequences.transaction_sequence_config import TransactionSequenceConfig
+from vulcan_eda.uvm.configs.sequences.transaction_sequence_config import TransactionSequenceConfig
 
 class TransactionSequence(pyuvm.uvm_sequence):
     def __init__(self, name):
