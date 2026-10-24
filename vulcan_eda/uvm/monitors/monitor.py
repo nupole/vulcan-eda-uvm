@@ -7,5 +7,5 @@ class Monitor(pyuvm.uvm_monitor):
 
     async def run_phase(self):
         while True:
-            data = await self._interface.get()
+            data = await self._interface.get_data()
             self.analysis_port.write(data)

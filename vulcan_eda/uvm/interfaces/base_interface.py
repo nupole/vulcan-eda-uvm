@@ -11,7 +11,7 @@ class BaseInterface(abc.ABC):
         ...
 
     @abc.abstractmethod
-    async def get(self):
+    async def get_data(self):
         ...
 
     async def _write_edge(self):

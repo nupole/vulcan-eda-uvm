@@ -14,7 +14,7 @@ class ValidDataInterface(BaseInterface):
         await self._write_edge()
         self.write_valid_data(valid, data)
 
-    async def get(self):
+    async def get_data(self):
         while True:
             await self._read_edge()
             valid, data = self.read_valid_data()

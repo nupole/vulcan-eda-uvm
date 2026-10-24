@@ -13,7 +13,7 @@ class DataInterface(BaseInterface):
         await self._write_edge()
         self.write_data(data)
 
-    async def get(self):
+    async def get_data(self):
         await self._read_edge()
         return self.read_data()
 

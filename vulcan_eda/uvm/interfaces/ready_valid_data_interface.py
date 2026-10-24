@@ -11,7 +11,7 @@ class ReadyValidDataInterface(BaseInterface):
         self._ready_interface = DataInterface(clk, ready)
         self._valid_data_interface = ValidDataInterface(clk, valid, data)
 
-    async def get(self):
+    async def get_data(self):
         return self._from_values(await self._is_consumed())
 
     def read_ready_valid_data(self):
