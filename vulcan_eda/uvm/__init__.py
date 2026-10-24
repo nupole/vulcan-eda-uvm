@@ -1,9 +1,11 @@
 import vulcan_eda.uvm.agents
 import vulcan_eda.uvm.configs.agents
 import vulcan_eda.uvm.configs.layers
+import vulcan_eda.uvm.drivers
 import vulcan_eda.uvm.generators
 import vulcan_eda.uvm.interfaces
 import vulcan_eda.uvm.layers
+import vulcan_eda.uvm.monitors
 import vulcan_eda.uvm.scoreboards
 import vulcan_eda.uvm.sequences
 import vulcan_eda.uvm.signals
