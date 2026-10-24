@@ -1,9 +1,10 @@
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
+from vulcan_eda.uvm.signals.signal import Signal
 
 class DataInterface(BaseInterface):
     def __init__(self, clk, data):
         super().__init__(clk)
-        self._data = data
+        self._data = Signal.wrap(data)
 
     async def put(self, sequence_item):
         await self.put_data(sequence_item.data)

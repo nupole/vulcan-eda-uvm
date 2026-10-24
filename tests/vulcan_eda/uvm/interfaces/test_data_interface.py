@@ -8,6 +8,23 @@ import pyuvm
 
 import vulcan_eda.uvm
 
+class Handle:
+    def __init__(self, width):
+        self.width = width
+        self.value = 0
+
+    def __len__(self):
+        return self.width
+
+def test_reads_and_drives_a_raw_pin():
+    handle = Handle(8)
+    data_interface = vulcan_eda.uvm.interfaces.DataInterface(None, handle)
+    data_interface.write_data(3)
+    assert (handle.value, data_interface.read_data()) == (3, 3)
+
+def test_keeps_signal_adapters():
+    assert vulcan_eda.uvm.interfaces.DataInterface(None, vulcan_eda.uvm.signals.Constant(1)).read_data() == 1
+
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data)
