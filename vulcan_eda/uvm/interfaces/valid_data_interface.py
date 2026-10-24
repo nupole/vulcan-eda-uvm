@@ -26,4 +26,7 @@ class ValidDataInterface(BaseInterface):
 
     def write_valid_data(self, valid, data):
         self._valid_interface.write_data(valid)
-        self._data_interface.write_data(data)
+        if data is None:
+            self._data_interface.write_random_data()
+        else:
+            self._data_interface.write_data(data)

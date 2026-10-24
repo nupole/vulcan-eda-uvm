@@ -21,24 +21,20 @@ def run_iterable_valid_data_sequence(sequencer, iterable):
     return [(item.valid, item.data) for item in sequencer.items]
 
 def test_iterable_valid_data_sequence_sends_each_element_once_then_idles(recording_sequencer):
-    assert run_iterable_valid_data_sequence(recording_sequencer, (3, 1, 2)) == [(True, 3), (True, 1), (True, 2), (False, 2)]
+    assert run_iterable_valid_data_sequence(recording_sequencer, (3, 1, 2)) == [(True, 3), (True, 1), (True, 2), (False, None)]
 
 def test_iterable_valid_data_sequence_accepts_a_generator(recording_sequencer):
-    assert run_iterable_valid_data_sequence(recording_sequencer, (data for data in range(2))) == [(True, 0), (True, 1), (False, 1)]
+    assert run_iterable_valid_data_sequence(recording_sequencer, (data for data in range(2))) == [(True, 0), (True, 1), (False, None)]
 
 def test_iterable_valid_data_sequence_ignores_max_num_txn(recording_sequencer):
     pyuvm.ConfigDB().set(recording_sequencer, "", "transaction_sequence_config", TransactionSequenceConfig(max_num_txn=1))
     assert [data for valid, data in run_iterable_valid_data_sequence(recording_sequencer, (3, 1, 2)) if valid] == [3, 1, 2]
 
-def test_iterable_valid_data_sequence_idles_hold_previous_data(recording_sequencer):
+def test_iterable_valid_data_sequence_idles_carry_no_data(recording_sequencer):
     pyuvm.ConfigDB().set(recording_sequencer, "", "transaction_sequence_config", TransactionSequenceConfig(txn_pct=50))
     items = run_iterable_valid_data_sequence(recording_sequencer, (3, 1, 2))
     assert [data for valid, data in items if valid] == [3, 1, 2]
-    previous_data = 3
-    for valid, data in items:
-        if not valid:
-            assert data == previous_data
-        previous_data = data
+    assert {data for valid, data in items if not valid} == {None}
 
 def test_iterable_valid_data_sequence_requires_elements(recording_sequencer):
     with pytest.raises(ValueError):

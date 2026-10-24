@@ -42,9 +42,7 @@ class IterableValidDataSequence(TransactionSequence):
             raise ValueError("iterable must not be empty")
         self.max_num_txn = len(data)
         self._iterator = iter(data)
-        self._data = data[0]
 
     def _get_next_sequence_item(self, is_txn):
-        if is_txn:
-            self._data = next(self._iterator)
-        return ValidDataSequenceItem('iterable_valid_data_sequence_item', is_txn, self._data)
+        data = next(self._iterator) if is_txn else None
+        return ValidDataSequenceItem('iterable_valid_data_sequence_item', is_txn, data)

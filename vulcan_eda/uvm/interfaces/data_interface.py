@@ -22,3 +22,6 @@ class DataInterface(BaseInterface):
 
     def write_data(self, data):
         self._data.value = data
+
+    def write_random_data(self):
+        self._data.value = self._data.random_value()

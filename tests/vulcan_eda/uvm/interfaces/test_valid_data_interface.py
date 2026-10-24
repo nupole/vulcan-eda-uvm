@@ -8,6 +8,30 @@ import pyuvm
 
 import vulcan_eda.uvm
 
+class Handle:
+    def __init__(self, width):
+        self.width = width
+        self.value = 0
+
+    def __len__(self):
+        return self.width
+
+def test_idle_without_data_drives_random_data_and_keeps_constants():
+    valid, data = Handle(1), Handle(16)
+    valid_data_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(None, valid, vulcan_eda.uvm.signals.Bundle(data, vulcan_eda.uvm.signals.Constant(0)))
+    driven = set()
+    for _ in range(50):
+        valid_data_interface.write_valid_data(0, None)
+        driven.add(data.value)
+    assert valid.value == 0
+    assert len(driven) > 1
+
+def test_explicit_idle_data_is_driven_as_given():
+    valid, data = Handle(1), Handle(16)
+    valid_data_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(None, valid, data)
+    valid_data_interface.write_valid_data(0, 7)
+    assert data.value == 7
+
 class ValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.upstream_valid, cocotb.top.upstream_data)
