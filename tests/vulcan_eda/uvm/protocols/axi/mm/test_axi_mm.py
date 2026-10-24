@@ -9,16 +9,11 @@ import pyuvm
 
 import vulcan_eda.uvm
 
-from vulcan_eda.uvm.configs.agents import AgentConfig
-from vulcan_eda.uvm.configs.layers import TranslationLayerConfig
-from vulcan_eda.uvm.interfaces import ReadyValidDataReceiverInterface, ReadyValidDataTransmitterInterface
-from vulcan_eda.uvm.layers import TranslationLayer
 from vulcan_eda.uvm.protocols.axi.mm.configs import AxiConfig
-from vulcan_eda.uvm.protocols.axi.mm.data import AxiAddress, AxiReadData, AxiResponse, AxiTransaction, AxiWriteData, AxiWriteResponse
-from vulcan_eda.uvm.protocols.axi.mm.sequences import AxiTransactionToChannelSequence
-from vulcan_eda.uvm.protocols.axi.mm.subscribers import AxiChannelToTransactionSubscriber
+from vulcan_eda.uvm.protocols.axi.mm.configs.environments import AxiEnvironmentConfig
+from vulcan_eda.uvm.protocols.axi.mm.data import AxiResponse, AxiTransaction
+from vulcan_eda.uvm.protocols.axi.mm.environments import AxiEnvironment
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
-from vulcan_eda.uvm.signals import Constant
 
 DATA = (0x01234567, 0x89ABCDEF, 0xDEADBEEF, 0x0F0F0F0F)
 
@@ -35,28 +30,18 @@ class AxiTransactionSequence(pyuvm.uvm_sequence):
 class AxiMmEnv(pyuvm.uvm_env):
     def build_phase(self):
         dut = cocotb.top
-        interfaces = {
-            "aw": ReadyValidDataTransmitterInterface(dut.clk, dut.awready, dut.awvalid, {"address": dut.awaddr, "bytes_per_beat": Constant(2), "prot": dut.awprot}, AxiAddress),
-            "w": ReadyValidDataTransmitterInterface(dut.clk, dut.wready, dut.wvalid, {"data": dut.wdata, "strobe": dut.wstrb}, AxiWriteData),
-            "b": ReadyValidDataReceiverInterface(dut.clk, dut.bready, dut.bvalid, {"response": dut.bresp}, AxiWriteResponse),
-            "ar": ReadyValidDataTransmitterInterface(dut.clk, dut.arready, dut.arvalid, {"address": dut.araddr, "bytes_per_beat": Constant(2), "prot": dut.arprot}, AxiAddress),
-            "r": ReadyValidDataReceiverInterface(dut.clk, dut.rready, dut.rvalid, {"data": dut.rdata, "response": dut.rresp}, AxiReadData)}
-        self.agents = {}
-        for channel, interface in interfaces.items():
-            pyuvm.ConfigDB().set(self, f"{channel}_agent", "config", AgentConfig(interface))
-            self.agents[channel] = vulcan_eda.uvm.agents.Agent.create(f"{channel}_agent", self)
-        pyuvm.ConfigDB().set(self, "layer", "config", TranslationLayerConfig(
-            translation_sequence_type=AxiTransactionToChannelSequence,
-            translation_subscriber_type=AxiChannelToTransactionSubscriber,
-            forwarded_configs={"axi_config": AxiConfig.from_pins(AxiConfig.Profile.LITE, dut.wdata, dut.awaddr)}))
-        self.layer = TranslationLayer.create("layer", self)
+        pyuvm.ConfigDB().set(self, "axi_environment", "config", AxiEnvironmentConfig.from_prefix(
+            dut, "", clk=dut.clk, profile=AxiConfig.Profile.LITE))
+        self.axi_environment = AxiEnvironment.create("axi_environment", self)
+        pyuvm.ConfigDB().set(self, "passive_axi_environment", "config", AxiEnvironmentConfig.from_prefix(
+            dut, "", clk=dut.clk, profile=AxiConfig.Profile.LITE, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE))
+        self.passive_axi_environment = AxiEnvironment.create("passive_axi_environment", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
+        self.passive_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("passive_scoreboard", self)
 
     def connect_phase(self):
-        for channel, agent in self.agents.items():
-            self.layer.lower_sequencers[channel] = agent.sequencer
-            agent.analysis_port.connect(self.layer.analysis_exports[channel])
-        self.layer.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
+        self.axi_environment.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
+        self.passive_axi_environment.analysis_port.connect(self.passive_scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()
 class AxiMmTest(pyuvm.uvm_test):
@@ -74,11 +59,12 @@ class AxiMmTest(pyuvm.uvm_test):
             self._expect(dataclasses.replace(read, data=(data,), response=AxiResponse.OKAY))
         axi_transaction_sequence = AxiTransactionSequence.create("axi_transaction_sequence")
         axi_transaction_sequence.txns = writes + reads
-        await axi_transaction_sequence.start(self.env.layer.sequencer)
+        await axi_transaction_sequence.start(self.env.axi_environment.sequencer)
         self.drop_objection()
 
     def _expect(self, txn):
-        self.env.scoreboard.expected_data_analysis_fifo.analysis_export.write(txn)
+        for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard):
+            scoreboard.expected_data_analysis_fifo.analysis_export.write(txn)
 
 def test_axi_mm(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')
