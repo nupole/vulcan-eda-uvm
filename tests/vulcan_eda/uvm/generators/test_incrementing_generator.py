@@ -1,12 +1,10 @@
 import dataclasses
-import itertools
 
 import pytest
 
 from vulcan_eda.uvm.generators import IncrementingGenerator
 
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
 
 def test_counts_up_from_zero_by_default():
     assert take(IncrementingGenerator(), 4) == [0, 1, 2, 3]

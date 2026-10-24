@@ -1,5 +1,4 @@
 import random
-import types
 
 import cocotb.types
 import pytest
@@ -8,32 +7,23 @@ from vulcan_eda.uvm.signals.base_signal import BaseSignal
 from vulcan_eda.uvm.signals.bundle import Bundle
 from vulcan_eda.uvm.signals.constant import Constant
 
-def signal(value):
-    return types.SimpleNamespace(value=cocotb.types.LogicArray(value))
+from tests.support.signals import Handle
 
 def test_value_reads_each_signal():
-    assert Bundle(signal("01"), signal("1")).value == (cocotb.types.LogicArray("01"), cocotb.types.LogicArray("1"))
+    assert Bundle(Handle(2, cocotb.types.LogicArray("01")), Handle(1, cocotb.types.LogicArray("1"))).value == (cocotb.types.LogicArray("01"), cocotb.types.LogicArray("1"))
 
 def test_value_drives_each_signal():
-    data, last = signal("00"), signal("0")
+    data, last = Handle(2, cocotb.types.LogicArray("00")), Handle(1, cocotb.types.LogicArray("0"))
     Bundle(data, last).value = (cocotb.types.LogicArray("10"), cocotb.types.LogicArray("1"))
     assert (data.value, last.value) == (cocotb.types.LogicArray("10"), cocotb.types.LogicArray("1"))
 
 def test_value_rejects_wrong_length():
     with pytest.raises(ValueError):
-        Bundle(signal("00"), signal("0")).value = (cocotb.types.LogicArray("10"),)
+        Bundle(Handle(2, cocotb.types.LogicArray("00")), Handle(1, cocotb.types.LogicArray("0"))).value = (cocotb.types.LogicArray("10"),)
 
 def test_nested_bundle():
-    bundle = Bundle(Bundle(signal("01"), signal("1")), signal("0"))
+    bundle = Bundle(Bundle(Handle(2, cocotb.types.LogicArray("01")), Handle(1, cocotb.types.LogicArray("1"))), Handle(1, cocotb.types.LogicArray("0")))
     assert bundle.value == ((cocotb.types.LogicArray("01"), cocotb.types.LogicArray("1")), cocotb.types.LogicArray("0"))
-
-class Handle:
-    def __init__(self, width):
-        self.width = width
-        self.value = 0
-
-    def __len__(self):
-        return self.width
 
 def test_is_a_base_signal():
     assert isinstance(Bundle(), BaseSignal)

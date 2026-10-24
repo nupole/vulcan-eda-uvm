@@ -2,13 +2,7 @@ import random
 
 from vulcan_eda.uvm.signals import BaseSignal, Constant, Signal
 
-class Handle:
-    def __init__(self, width, value=0):
-        self.width = width
-        self.value = value
-
-    def __len__(self):
-        return self.width
+from tests.support.signals import Handle
 
 def test_is_a_base_signal():
     assert isinstance(Signal(Handle(8)), BaseSignal)

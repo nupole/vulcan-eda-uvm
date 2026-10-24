@@ -1,12 +1,10 @@
 import dataclasses
-import itertools
 
 import pytest
 
 from vulcan_eda.uvm.generators import PrbsGenerator
 
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
 
 PRBS7 = "0000001000001100001010001111001000101100111010100111110100001110001001001101101011011110110001101001011101110011001010101111111"
 

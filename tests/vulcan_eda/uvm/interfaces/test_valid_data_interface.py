@@ -10,13 +10,8 @@ import pyuvm
 
 import vulcan_eda.uvm
 
-class Handle:
-    def __init__(self, width):
-        self.width = width
-        self.value = 0
-
-    def __len__(self):
-        return self.width
+from tests.support.components import create_agent
+from tests.support.signals import Handle
 
 def test_idle_drives_valid_low_and_random_data_by_default():
     valid, data = Handle(1), Handle(16)
@@ -41,12 +36,8 @@ def test_data_is_driven_with_valid_high():
 
 class ValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
-        upstream_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.upstream_valid, cocotb.top.upstream_data)
-        vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface).set(self, "upstream_agent")
-        self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
-        downstream_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.downstream_valid, cocotb.top.downstream_data)
-        vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "downstream_agent")
-        self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
+        self.upstream_agent = create_agent(self, "upstream_agent", vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.upstream_valid, cocotb.top.upstream_data))
+        self.downstream_agent = create_agent(self, "downstream_agent", vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.downstream_valid, cocotb.top.downstream_data), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
     def connect_phase(self):

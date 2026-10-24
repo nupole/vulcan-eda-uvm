@@ -1,21 +1,12 @@
 import dataclasses
-import itertools
 
 import pytest
 
 from vulcan_eda.uvm.generators import RandomSignalGenerator
 from vulcan_eda.uvm.signals import Bundle, Constant
 
-class Handle:
-    def __init__(self, width, value=0):
-        self.width = width
-        self.value = value
-
-    def __len__(self):
-        return self.width
-
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
+from tests.support.signals import Handle
 
 def test_yields_random_values_of_the_signal_width():
     assert set(take(RandomSignalGenerator(Handle(2)), 200)) == {0, 1, 2, 3}

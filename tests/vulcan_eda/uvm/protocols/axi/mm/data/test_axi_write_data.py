@@ -1,9 +1,9 @@
-import types
-
 import cocotb.types
 import pytest
 
 from vulcan_eda.uvm.protocols.axi.mm.data import AxiWriteData
+
+from tests.support.signals import Handle
 
 def test_defaults_to_last_beat():
     assert AxiWriteData(0x12345678, 0xF).last
@@ -19,19 +19,16 @@ def test_identity_invariant():
     write_data = AxiWriteData(0x12345678, 0x5, last=False)
     assert AxiWriteData.from_values(write_data.to_values()) == write_data
 
-def signal(value=None):
-    return types.SimpleNamespace(value=value)
-
 def test_signals_follow_value_order():
-    assert AxiWriteData.signals(last=signal(2), strobe=signal(1), data=signal(0)).value == (0, 1, 2)
+    assert AxiWriteData.signals(last=Handle(32, 2), strobe=Handle(32, 1), data=Handle(32, 0)).value == (0, 1, 2)
 
 def test_signals_default_to_a_lite_write_data():
-    signals = AxiWriteData.signals(data=signal(), strobe=signal())
+    signals = AxiWriteData.signals(data=Handle(32), strobe=Handle(32))
     write_data = AxiWriteData(0xAB, 0xF)
     signals.value = write_data.to_values()
     assert AxiWriteData.from_values(signals.value) == write_data
 
 def test_signals_reject_a_non_last_beat_on_lite_defaults():
-    signals = AxiWriteData.signals(data=signal(), strobe=signal())
+    signals = AxiWriteData.signals(data=Handle(32), strobe=Handle(32))
     with pytest.raises(ValueError):
         signals.value = AxiWriteData(0xAB, 0xF, last=False).to_values()

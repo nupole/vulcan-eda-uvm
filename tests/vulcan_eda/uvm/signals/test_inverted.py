@@ -12,13 +12,8 @@ import vulcan_eda.uvm
 
 from vulcan_eda.uvm.signals import BaseSignal, Bundle, Constant, Inverted, Signal
 
-class Handle:
-    def __init__(self, width, value=0):
-        self.width = width
-        self.value = value
-
-    def __len__(self):
-        return self.width
+from tests.support.components import create_agent
+from tests.support.signals import Handle
 
 def test_is_a_base_signal():
     assert isinstance(Inverted(Handle(1)), BaseSignal)
@@ -67,10 +62,10 @@ def test_rejects_signals_without_a_width():
 class InvertedEnv(pyuvm.uvm_env):
     def build_phase(self):
         dut = cocotb.top
-        self.stimulus_agent = self._create_agent("stimulus_agent", Bundle(dut.ref_bit_in, Inverted(dut.bit_n_in), dut.ref_bus_in, Inverted(dut.bus_n_in)))
-        self.reference_agent = self._create_agent("reference_agent", Bundle(dut.ref_bit_out, dut.ref_bus_out), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
-        self.write_agent = self._create_agent("write_agent", Bundle(dut.bit_out, dut.bus_out), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
-        self.read_agent = self._create_agent("read_agent", Bundle(Inverted(dut.bit_n_out), Inverted(dut.bus_n_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.stimulus_agent = create_agent(self, "stimulus_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(dut.ref_bit_in, Inverted(dut.bit_n_in), dut.ref_bus_in, Inverted(dut.bus_n_in))))
+        self.reference_agent = create_agent(self, "reference_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(dut.ref_bit_out, dut.ref_bus_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.write_agent = create_agent(self, "write_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(dut.bit_out, dut.bus_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.read_agent = create_agent(self, "read_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(Inverted(dut.bit_n_out), Inverted(dut.bus_n_out))), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.write_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("write_scoreboard", self)
         self.read_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("read_scoreboard", self)
 
@@ -79,11 +74,6 @@ class InvertedEnv(pyuvm.uvm_env):
             self.reference_agent.analysis_port.connect(scoreboard.expected_data_analysis_fifo.analysis_export)
         self.write_agent.analysis_port.connect(self.write_scoreboard.actual_data_analysis_fifo.analysis_export)
         self.read_agent.analysis_port.connect(self.read_scoreboard.actual_data_analysis_fifo.analysis_export)
-
-    def _create_agent(self, name, signal, is_active=pyuvm.uvm_active_passive_enum.UVM_ACTIVE):
-        interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, signal)
-        vulcan_eda.uvm.configs.agents.AgentConfig(interface, is_active).set(self, name)
-        return vulcan_eda.uvm.agents.Agent.create(name, self)
 
 @pyuvm.test()
 class InvertedTest(pyuvm.uvm_test):

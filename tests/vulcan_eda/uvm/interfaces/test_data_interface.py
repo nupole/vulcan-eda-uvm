@@ -10,13 +10,8 @@ import pyuvm
 
 import vulcan_eda.uvm
 
-class Handle:
-    def __init__(self, width):
-        self.width = width
-        self.value = 0
-
-    def __len__(self):
-        return self.width
+from tests.support.components import RecordingSubscriber, create_agent
+from tests.support.signals import Handle
 
 def test_reads_and_drives_a_raw_pin():
     handle = Handle(8)
@@ -42,23 +37,11 @@ def test_idle_drives_its_idle_generator():
 def test_keeps_signal_adapters():
     assert vulcan_eda.uvm.interfaces.DataInterface(None, vulcan_eda.uvm.signals.Constant(1)).read_data() == 1
 
-class DataRecorder(pyuvm.uvm_subscriber):
-    def __init__(self, name, parent):
-        super().__init__(name, parent)
-        self.data = []
-
-    def write(self, data):
-        self.data.append(data)
-
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
-        upstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data)
-        vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface).set(self, "upstream_agent")
-        self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
-        downstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.downstream_data)
-        vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "downstream_agent")
-        self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
-        self.data_recorder = DataRecorder.create("data_recorder", self)
+        self.upstream_agent = create_agent(self, "upstream_agent", vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data))
+        self.downstream_agent = create_agent(self, "downstream_agent", vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.downstream_data), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.data_recorder = RecordingSubscriber.create("data_recorder", self)
 
     def connect_phase(self):
         self.downstream_agent.analysis_port.connect(self.data_recorder.analysis_export)
@@ -76,7 +59,7 @@ class DataInterfaceTest(pyuvm.uvm_test):
         data_sequence.data_generator = data
         await data_sequence.start(self.env.upstream_agent.sequencer)
         await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
-        recorded = self.env.data_recorder.data
+        recorded = self.env.data_recorder.items
         assert any(recorded[start:start + len(data)] == data for start in range(len(recorded)))
         self.drop_objection()
 

@@ -1,12 +1,10 @@
 import dataclasses
-import itertools
 
 import pytest
 
 from vulcan_eda.uvm.generators import RandomGenerator, RandomIntegerGenerator
 
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
 
 def test_is_a_random_generator():
     assert isinstance(RandomIntegerGenerator(0, 1), RandomGenerator)

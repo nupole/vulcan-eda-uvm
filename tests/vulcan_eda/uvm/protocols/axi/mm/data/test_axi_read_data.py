@@ -1,9 +1,9 @@
-import types
-
 import cocotb.types
 import pytest
 
 from vulcan_eda.uvm.protocols.axi.mm.data import AxiReadData, AxiResponse
+
+from tests.support.signals import Handle
 
 def test_defaults_to_last_beat_with_id_zero():
     read_data = AxiReadData(0x12345678, AxiResponse.OKAY)
@@ -24,19 +24,16 @@ def test_identity_invariant():
     read_data = AxiReadData(0x12345678, AxiResponse.DECERR, last=False, id=3)
     assert AxiReadData.from_values(read_data.to_values()) == read_data
 
-def signal(value=None):
-    return types.SimpleNamespace(value=value)
-
 def test_signals_follow_value_order():
-    assert AxiReadData.signals(last=signal(3), response=signal(2), data=signal(1), id=signal(0)).value == (0, 1, 2, 3)
+    assert AxiReadData.signals(last=Handle(32, 3), response=Handle(32, 2), data=Handle(32, 1), id=Handle(32, 0)).value == (0, 1, 2, 3)
 
 def test_signals_default_to_a_lite_read_data():
-    signals = AxiReadData.signals(data=signal(), response=signal())
+    signals = AxiReadData.signals(data=Handle(32), response=Handle(32))
     read_data = AxiReadData(0x12, AxiResponse.DECERR)
     signals.value = read_data.to_values()
     assert AxiReadData.from_values(signals.value) == read_data
 
 def test_signals_reject_a_non_last_beat_on_lite_defaults():
-    signals = AxiReadData.signals(data=signal(), response=signal())
+    signals = AxiReadData.signals(data=Handle(32), response=Handle(32))
     with pytest.raises(ValueError):
         signals.value = AxiReadData(0x12, AxiResponse.OKAY, last=False).to_values()

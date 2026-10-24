@@ -1,21 +1,12 @@
 import dataclasses
-import itertools
 
 import pytest
 
 from vulcan_eda.uvm.generators import HoldGenerator
 from vulcan_eda.uvm.signals import Bundle, Constant, Inverted
 
-class Handle:
-    def __init__(self, width, value=0):
-        self.width = width
-        self.value = value
-
-    def __len__(self):
-        return self.width
-
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
+from tests.support.signals import Handle
 
 def test_yields_the_current_value():
     assert take(HoldGenerator(Handle(8, value=5)), 3) == [5, 5, 5]

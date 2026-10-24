@@ -1,18 +1,16 @@
 import dataclasses
-import itertools
 import random
 
 import pytest
 
 from vulcan_eda.uvm.generators import RandomGenerator
 
+from tests.support.generators import take
+
 @dataclasses.dataclass(frozen=True)
 class WordGenerator(RandomGenerator):
     def next_value(self, rng):
         return rng.getrandbits(32)
-
-def take(generator, count):
-    return list(itertools.islice(generator, count))
 
 def test_seed_makes_every_iteration_identical():
     word_generator = WordGenerator(seed=1)

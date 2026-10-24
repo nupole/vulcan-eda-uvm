@@ -1,12 +1,10 @@
 import dataclasses
-import itertools
 
 import pytest
 
 from vulcan_eda.uvm.generators import WalkingOneHotGenerator
 
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
 
 def test_walks_a_single_one_through_each_bit_then_repeats():
     assert take(WalkingOneHotGenerator(4), 6) == [0b0001, 0b0010, 0b0100, 0b1000, 0b0001, 0b0010]

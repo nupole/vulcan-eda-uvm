@@ -1,10 +1,10 @@
-import types
-
 import cocotb.types
 import pytest
 
 from vulcan_eda.uvm.protocols.axi.mm.data import AxiAddress, AxiBurst
 from vulcan_eda.uvm.signals import Constant
+
+from tests.support.signals import Handle
 
 def test_defaults_are_a_single_beat_incr_with_id_and_prot_zero():
     address = AxiAddress(0x10, 4)
@@ -31,20 +31,17 @@ def test_rejects_bytes_per_beat_not_a_power_of_two(bytes_per_beat):
     with pytest.raises(ValueError):
         AxiAddress(0x10, bytes_per_beat)
 
-def signal(value=None):
-    return types.SimpleNamespace(value=value)
-
 def test_signals_follow_value_order():
-    pins = {name: signal(value) for value, name in enumerate(("id", "address", "num_beats", "bytes_per_beat", "burst", "prot"))}
+    pins = {name: Handle(32, value) for value, name in enumerate(("id", "address", "num_beats", "bytes_per_beat", "burst", "prot"))}
     assert AxiAddress.signals(**pins).value == (0, 1, 2, 3, 4, 5)
 
 def test_signals_default_to_a_lite_address():
-    signals = AxiAddress.signals(address=signal(), bytes_per_beat=Constant(2), prot=signal())
+    signals = AxiAddress.signals(address=Handle(32), bytes_per_beat=Constant(2), prot=Handle(32))
     address = AxiAddress(0x10, 4, prot=2)
     signals.value = address.to_values()
     assert AxiAddress.from_values(signals.value) == address
 
 def test_signals_reject_a_burst_on_lite_defaults():
-    signals = AxiAddress.signals(address=signal(), bytes_per_beat=Constant(2), prot=signal())
+    signals = AxiAddress.signals(address=Handle(32), bytes_per_beat=Constant(2), prot=Handle(32))
     with pytest.raises(ValueError):
         signals.value = AxiAddress(0x10, 4, num_beats=2).to_values()

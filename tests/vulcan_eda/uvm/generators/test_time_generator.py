@@ -1,13 +1,11 @@
 import dataclasses
-import itertools
 
 import cocotb.simtime
 import pytest
 
 from vulcan_eda.uvm.generators import TimeGenerator
 
-def take(generator, count):
-    return list(itertools.islice(generator, count))
+from tests.support.generators import take
 
 @pytest.fixture
 def sim_time(monkeypatch):
