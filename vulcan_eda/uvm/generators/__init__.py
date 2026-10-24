@@ -1,3 +1,4 @@
 from vulcan_eda.uvm.generators.constant_generator import ConstantGenerator
+from vulcan_eda.uvm.generators.incrementing_generator import IncrementingGenerator
 from vulcan_eda.uvm.generators.iterable_generator import IterableGenerator
 from vulcan_eda.uvm.generators.pattern_generator import PatternGenerator
