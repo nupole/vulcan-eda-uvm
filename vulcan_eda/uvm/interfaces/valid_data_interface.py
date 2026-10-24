@@ -1,5 +1,5 @@
-from vulcan_eda.uvm.interfaces import DataInterface
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
+from vulcan_eda.uvm.interfaces.data_interface import DataInterface
 
 class ValidDataInterface(BaseInterface):
     def __init__(self, clk, valid, data):
