@@ -1,18 +1,20 @@
+from vulcan_eda.uvm.generators.random_signal_generator import RandomSignalGenerator
 from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 from vulcan_eda.uvm.interfaces.data_interface import DataInterface
 
 class ValidDataInterface(BaseInterface):
-    def __init__(self, clk, valid, data):
+    def __init__(self, clk, valid, data, idle_generator=None):
         super().__init__(clk)
         self._valid_interface = DataInterface(clk, valid)
-        self._data_interface = DataInterface(clk, data)
+        self._data_interface = DataInterface(clk, data, RandomSignalGenerator(data) if idle_generator is None else idle_generator)
 
-    async def put(self, sequence_item):
-        await self.put_valid_data(sequence_item.valid, sequence_item.data)
-
-    async def put_valid_data(self, valid, data):
+    async def put_data(self, data):
         await self._write_edge()
-        self.write_valid_data(valid, data)
+        self.write_valid_data(1, data)
+
+    async def put_idle(self):
+        await self._write_edge()
+        self.write_idle()
 
     async def get_data(self):
         while True:
@@ -26,7 +28,8 @@ class ValidDataInterface(BaseInterface):
 
     def write_valid_data(self, valid, data):
         self._valid_interface.write_data(valid)
-        if data is None:
-            self._data_interface.write_random_data()
-        else:
-            self._data_interface.write_data(data)
+        self._data_interface.write_data(data)
+
+    def write_idle(self):
+        self._valid_interface.write_data(0)
+        self._data_interface.write_idle()

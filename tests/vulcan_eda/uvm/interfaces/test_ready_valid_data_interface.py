@@ -68,14 +68,35 @@ class EdgeRecordingReceiverInterface(EdgeRecorder, vulcan_eda.uvm.interfaces.Rea
 def test_transmitter_writes_on_its_own_write_edge():
     valid, data = signal(0), signal(0)
     transmitter_interface = EdgeRecordingTransmitterInterface(None, signal(1), valid, data)
-    asyncio.run(transmitter_interface.put_valid_data(1, 5))
+    asyncio.run(transmitter_interface.put_data(5))
     assert (transmitter_interface.write_edges, valid.value, data.value) == (1, 1, 5)
+
+def test_transmitter_idles_valid_low_with_its_idle_generator():
+    valid, data = signal(1), signal(5)
+    transmitter_interface = EdgeRecordingTransmitterInterface(None, signal(1), valid, data, idle_generator=vulcan_eda.uvm.generators.ConstantGenerator(9))
+    asyncio.run(transmitter_interface.put_idle())
+    assert (transmitter_interface.write_edges, valid.value, data.value) == (1, 0, 9)
 
 def test_receiver_writes_on_its_own_write_edge():
     ready = signal(0)
     receiver_interface = EdgeRecordingReceiverInterface(None, ready, signal(0), signal(0))
-    asyncio.run(receiver_interface.put_ready(1))
+    asyncio.run(receiver_interface.put_data(1))
     assert (receiver_interface.write_edges, ready.value) == (1, 1)
+
+def test_receiver_holds_ready_when_idle_by_default():
+    ready = signal(1)
+    receiver_interface = EdgeRecordingReceiverInterface(None, ready, signal(0), signal(0))
+    asyncio.run(receiver_interface.put_idle())
+    assert (receiver_interface.write_edges, ready.value) == (1, 1)
+
+def test_receiver_drives_its_idle_generator_when_idle():
+    ready = signal(1)
+    receiver_interface = EdgeRecordingReceiverInterface(None, ready, signal(0), signal(0), idle_generator=vulcan_eda.uvm.generators.PatternGenerator((0, 1)))
+    readies = []
+    for _ in range(4):
+        asyncio.run(receiver_interface.put_idle())
+        readies.append(ready.value)
+    assert readies == [0, 1, 0, 1]
 
 class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):

@@ -3,13 +3,13 @@ from vulcan_eda.uvm.interfaces.data_interface import DataInterface
 from vulcan_eda.uvm.interfaces.valid_data_interface import ValidDataInterface
 
 class ReadyValidDataInterface(BaseInterface):
-    def __init__(self, clk, ready, valid, data, data_type=None):
+    def __init__(self, clk, ready, valid, data, data_type=None, idle_generator=None):
         super().__init__(clk)
         self._data_type = data_type
         if data_type is not None:
             data = data_type.signals(**data)
-        self._ready_interface = DataInterface(clk, ready)
-        self._valid_data_interface = ValidDataInterface(clk, valid, data)
+        self._ready_interface = DataInterface(clk, ready, idle_generator)
+        self._valid_data_interface = ValidDataInterface(clk, valid, data, idle_generator)
 
     async def get_data(self):
         return self._from_values(await self._is_consumed())

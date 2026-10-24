@@ -7,7 +7,11 @@ class BaseInterface(abc.ABC):
         self._clk = clk
 
     @abc.abstractmethod
-    async def put(self, sequence_item):
+    async def put_data(self, data):
+        ...
+
+    @abc.abstractmethod
+    async def put_idle(self):
         ...
 
     @abc.abstractmethod
