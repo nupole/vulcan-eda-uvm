@@ -1,6 +1,6 @@
 import pyuvm
 
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 
 class TranslationSequence(pyuvm.uvm_sequence):
     channels = ()

@@ -5,7 +5,7 @@ import pyuvm
 from vulcan_eda.uvm.protocols.axi.mm.configs.axi_config import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.sequences.axi_transaction_sequence_config import AxiTransactionSequenceConfig
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_transaction import AxiTransaction
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 
 class AxiTransactionSequence(pyuvm.uvm_sequence):
     def configure(self):

@@ -1,7 +1,7 @@
 import pyuvm
 
 from vulcan_eda.uvm.generators.constant_generator import ConstantGenerator
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
 
 class ValidDataSequence(pyuvm.uvm_sequence):

@@ -1,9 +1,6 @@
 import pyuvm
 
-class DataSequenceItem(pyuvm.uvm_sequence_item):
-    def __init__(self, name, data):
-        super().__init__(name)
-        self.data = data
+from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 
 class DataSequence(pyuvm.uvm_sequence):
     _data_generator = None

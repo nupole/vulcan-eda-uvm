@@ -8,7 +8,7 @@ from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
 from vulcan_eda.uvm.protocols.axi.stream.configs.sequences import AxiStreamPacketToBeatSequenceConfig
 from vulcan_eda.uvm.protocols.axi.stream.data import AxiStreamPacket
 from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_packet_to_beat_sequence import AxiStreamPacketToBeatSequence
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
 from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequence
 

@@ -5,7 +5,7 @@ import pyuvm
 from vulcan_eda.uvm.protocols.axi.stream.configs.axi_stream_config import AxiStreamConfig
 from vulcan_eda.uvm.protocols.axi.stream.configs.sequences.axi_stream_packet_sequence_config import AxiStreamPacketSequenceConfig
 from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 
 class AxiStreamPacketSequence(pyuvm.uvm_sequence):
     def configure(self):
