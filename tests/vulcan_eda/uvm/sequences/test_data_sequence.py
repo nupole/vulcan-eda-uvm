@@ -69,3 +69,13 @@ def test_data_sequence_restarts_a_re_iterable_data_generator(recording_sequencer
 def test_data_sequence_requires_a_data_generator(recording_sequencer):
     with pytest.raises(ValueError):
         asyncio.run(DataSequence.create("data_sequence").start(recording_sequencer))
+
+def test_data_sequence_rejects_a_data_generator_that_is_not_iterable_when_set():
+    with pytest.raises(TypeError):
+        DataSequence.create("data_sequence").data_generator = 5
+
+def test_data_sequence_data_generator_can_be_read_back():
+    data_sequence = DataSequence.create("data_sequence")
+    data_generator = IterableGenerator((1, 0))
+    data_sequence.data_generator = data_generator
+    assert data_sequence.data_generator == data_generator

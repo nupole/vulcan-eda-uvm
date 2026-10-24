@@ -11,12 +11,21 @@ class DataSequenceItem(pyuvm.uvm_sequence_item):
         self.data = data
 
 class DataSequence(pyuvm.uvm_sequence):
-    data_generator = None
+    _data_generator = None
+
+    @property
+    def data_generator(self):
+        return self._data_generator
+
+    @data_generator.setter
+    def data_generator(self, data_generator):
+        iter(data_generator)
+        self._data_generator = data_generator
 
     async def body(self):
-        if self.data_generator is None:
+        if self._data_generator is None:
             raise ValueError("data_generator must be set before starting a DataSequence")
-        for data in self.data_generator:
+        for data in self._data_generator:
             sequence_item = DataSequenceItem('data_sequence_item', data)
             await self.start_item(sequence_item)
             await self.finish_item(sequence_item)
