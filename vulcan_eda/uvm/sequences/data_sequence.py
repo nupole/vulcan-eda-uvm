@@ -10,6 +10,17 @@ class DataSequenceItem(pyuvm.uvm_sequence_item):
         super().__init__(name)
         self.data = data
 
+class DataSequence(pyuvm.uvm_sequence):
+    data_generator = None
+
+    async def body(self):
+        if self.data_generator is None:
+            raise ValueError("data_generator must be set before starting a DataSequence")
+        for data in self.data_generator:
+            sequence_item = DataSequenceItem('data_sequence_item', data)
+            await self.start_item(sequence_item)
+            await self.finish_item(sequence_item)
+
 class RandomDataSequence(TransactionSequence):
     def _configure(self):
         super()._configure()
