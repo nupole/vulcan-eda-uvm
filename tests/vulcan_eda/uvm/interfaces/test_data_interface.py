@@ -1,7 +1,9 @@
+import itertools
 import pathlib
 
 import cocotb
 import cocotb.clock
+import cocotb.triggers
 import cocotb_tools.runner
 
 import pyuvm
@@ -40,6 +42,14 @@ def test_idle_drives_its_idle_generator():
 def test_keeps_signal_adapters():
     assert vulcan_eda.uvm.interfaces.DataInterface(None, vulcan_eda.uvm.signals.Constant(1)).read_data() == 1
 
+class DataRecorder(pyuvm.uvm_subscriber):
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.data = []
+
+    def write(self, data):
+        self.data.append(data)
+
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.upstream_data)
@@ -48,22 +58,26 @@ class DataInterfaceEnv(pyuvm.uvm_env):
         downstream_interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, cocotb.top.downstream_data)
         pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE))
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
-        self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
+        self.data_recorder = DataRecorder.create("data_recorder", self)
 
     def connect_phase(self):
-        self.upstream_agent.analysis_port.connect(self.scoreboard.expected_data_analysis_fifo.analysis_export)
-        self.downstream_agent.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
+        self.downstream_agent.analysis_port.connect(self.data_recorder.analysis_export)
 
 @pyuvm.test()
 class DataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = DataInterfaceEnv("env", self)
-        self.random_data_sequence = vulcan_eda.uvm.sequences.RandomDataSequence("random_data_sequence")
 
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        await self.random_data_sequence.start(self.env.upstream_agent.sequencer)
+        data_sequence = vulcan_eda.uvm.sequences.DataSequence.create("data_sequence")
+        data = list(itertools.islice(vulcan_eda.uvm.generators.RandomBitsGenerator(8), 100))
+        data_sequence.data_generator = data
+        await data_sequence.start(self.env.upstream_agent.sequencer)
+        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
+        recorded = self.env.data_recorder.data
+        assert any(recorded[start:start + len(data)] == data for start in range(len(recorded)))
         self.drop_objection()
 
 def test_data_interface(build_dir):

@@ -93,9 +93,9 @@ class InvertedTest(pyuvm.uvm_test):
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        iterable_data_sequence = vulcan_eda.uvm.sequences.IterableDataSequence.create("iterable_data_sequence")
-        iterable_data_sequence.iterable = [(bit, bit, bus, bus) for bit in range(2) for bus in range(16)]
-        await iterable_data_sequence.start(self.env.stimulus_agent.sequencer)
+        data_sequence = vulcan_eda.uvm.sequences.DataSequence.create("data_sequence")
+        data_sequence.data_generator = [(bit, bit, bus, bus) for bit in range(2) for bus in range(16)]
+        await data_sequence.start(self.env.stimulus_agent.sequencer)
         self.drop_objection()
 
 def test_inverted(build_dir):

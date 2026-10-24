@@ -1,7 +1,9 @@
+import itertools
 import pathlib
 
 import cocotb
 import cocotb.clock
+import cocotb.triggers
 import cocotb_tools.runner
 
 import pyuvm
@@ -48,20 +50,24 @@ class ValidDataInterfaceEnv(pyuvm.uvm_env):
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
     def connect_phase(self):
-        self.upstream_agent.analysis_port.connect(self.scoreboard.expected_data_analysis_fifo.analysis_export)
         self.downstream_agent.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()
 class ValidDataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = ValidDataInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.configs.sequences.TransactionSequenceConfig(txn_pct=50))
-        self.random_valid_data_sequence = vulcan_eda.uvm.sequences.RandomValidDataSequence("random_valid_data_sequence")
 
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        await self.random_valid_data_sequence.start(self.env.upstream_agent.sequencer)
+        valid_data_sequence = vulcan_eda.uvm.sequences.ValidDataSequence.create("valid_data_sequence")
+        valid_data_sequence.valid_generator = vulcan_eda.uvm.generators.RandomBooleanGenerator(50)
+        data = list(itertools.islice(vulcan_eda.uvm.generators.RandomBitsGenerator(8), 100))
+        for value in data:
+            self.env.scoreboard.expected_data_analysis_fifo.analysis_export.write(value)
+        valid_data_sequence.data_generator = data
+        await valid_data_sequence.start(self.env.upstream_agent.sequencer)
+        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
         self.drop_objection()
 
 def test_valid_data_interface(build_dir):
