@@ -1,13 +1,16 @@
 import pyuvm
 
-from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_beat_sequence import AxiStreamBeatSequence
+from vulcan_eda.uvm.protocols.axi.stream.configs.sequences.axi_stream_packet_to_beat_sequence_config import AxiStreamPacketToBeatSequenceConfig
 from vulcan_eda.uvm.sequences.translation_sequence import TranslationSequence
+from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequence
 
 class AxiStreamPacketToBeatSequence(TranslationSequence):
     channels = ("stream",)
 
     async def _translate(self, upper_item):
         config = pyuvm.ConfigDB().get(self.upper_sequencer, "", "axi_stream_config")
-        axi_stream_beat_sequence = AxiStreamBeatSequence.create("axi_stream_beat_sequence")
-        axi_stream_beat_sequence.beats = upper_item.data.to_beats(config.num_bytes)
-        await axi_stream_beat_sequence.start(self.lower_sequencers["stream"])
+        sequence_config = pyuvm.ConfigDB().get(self.upper_sequencer, "", "axi_stream_packet_to_beat_sequence_config", AxiStreamPacketToBeatSequenceConfig())
+        valid_data_sequence = ValidDataSequence.create("valid_data_sequence")
+        valid_data_sequence.valid_generator = sequence_config.valid_generator
+        valid_data_sequence.data_generator = upper_item.data.to_beats(config.num_bytes)
+        await valid_data_sequence.start(self.lower_sequencers["stream"])

@@ -10,13 +10,15 @@ import vulcan_eda.uvm
 
 from vulcan_eda.uvm.configs.agents import AgentConfig
 from vulcan_eda.uvm.configs.layers import TranslationLayerConfig
-from vulcan_eda.uvm.configs.sequences import RandomDataSequenceConfig, TransactionSequenceConfig
+from vulcan_eda.uvm.generators import RandomBooleanGenerator
 from vulcan_eda.uvm.interfaces import ReadyValidDataReceiverInterface, ReadyValidDataTransmitterInterface
 from vulcan_eda.uvm.layers import TranslationLayer
 from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
+from vulcan_eda.uvm.protocols.axi.stream.configs.sequences import AxiStreamPacketToBeatSequenceConfig
 from vulcan_eda.uvm.protocols.axi.stream.data import AxiStreamBeat
 from vulcan_eda.uvm.protocols.axi.stream.sequences import AxiStreamPacketToBeatSequence, RandomAxiStreamPacketSequence
 from vulcan_eda.uvm.protocols.axi.stream.subscribers import AxiStreamBeatToPacketSubscriber
+from vulcan_eda.uvm.sequences import DataSequence
 
 class RecordingRandomAxiStreamPacketSequence(RandomAxiStreamPacketSequence):
     def _get_next_packet(self):
@@ -52,22 +54,18 @@ class AxiStreamEnv(pyuvm.uvm_env):
 class AxiStreamTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = AxiStreamEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", TransactionSequenceConfig(txn_pct=50))
-        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "random_data_sequence_config", RandomDataSequenceConfig(max_data=1))
 
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        cocotb.start_soon(self._drive_ready())
+        ready_sequence = DataSequence.create("ready_sequence")
+        ready_sequence.data_generator = RandomBooleanGenerator(50)
+        cocotb.start_soon(ready_sequence.start(self.env.downstream_agent.sequencer))
+        pyuvm.ConfigDB().set(self.env.upstream_layer.sequencer, "", "axi_stream_packet_to_beat_sequence_config", AxiStreamPacketToBeatSequenceConfig(RandomBooleanGenerator(50)))
         recording_random_axi_stream_packet_sequence = RecordingRandomAxiStreamPacketSequence.create("recording_random_axi_stream_packet_sequence")
         recording_random_axi_stream_packet_sequence.expected_analysis_export = self.env.scoreboard.expected_data_analysis_fifo.analysis_export
         await recording_random_axi_stream_packet_sequence.start(self.env.upstream_layer.sequencer)
         self.drop_objection()
-
-    async def _drive_ready(self):
-        while True:
-            random_data_sequence = vulcan_eda.uvm.sequences.RandomDataSequence("random_data_sequence")
-            await random_data_sequence.start(self.env.downstream_agent.sequencer)
 
 def test_axi_stream(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')
