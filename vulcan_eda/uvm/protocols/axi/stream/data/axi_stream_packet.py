@@ -13,7 +13,7 @@ class AxiStreamPacket:
         for offset in range(0, len(self.data), num_bytes):
             data = int.from_bytes(self.data[offset:offset + num_bytes], "little")
             last = offset + num_bytes == len(self.data)
-            beats.append(AxiStreamBeat(data, last))
+            beats.append(AxiStreamBeat(data=data, last=last))
         return beats
 
     @classmethod

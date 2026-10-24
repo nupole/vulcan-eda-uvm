@@ -3,7 +3,7 @@ import dataclasses
 from vulcan_eda.uvm.signals.bundle import Bundle
 from vulcan_eda.uvm.signals.constant import Constant
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class AxiWriteData:
     data: int
     strobe: int

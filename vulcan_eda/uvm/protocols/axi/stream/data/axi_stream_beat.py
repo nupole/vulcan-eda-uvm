@@ -2,7 +2,7 @@ import dataclasses
 
 from vulcan_eda.uvm.signals.bundle import Bundle
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class AxiStreamBeat:
     data: int
     last: bool
@@ -17,4 +17,4 @@ class AxiStreamBeat:
     @classmethod
     def from_values(cls, values):
         data, last = values
-        return cls(int(data), bool(last))
+        return cls(data=int(data), last=bool(last))

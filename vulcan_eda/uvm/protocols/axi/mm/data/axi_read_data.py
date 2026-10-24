@@ -4,7 +4,7 @@ from vulcan_eda.uvm.protocols.axi.mm.data.axi_response import AxiResponse
 from vulcan_eda.uvm.signals.bundle import Bundle
 from vulcan_eda.uvm.signals.constant import Constant
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class AxiReadData:
     data: int
     response: AxiResponse

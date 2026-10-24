@@ -4,12 +4,12 @@ from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBe
 from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 
 def test_to_beats_single_beat():
-    assert AxiStreamPacket(bytes(range(4))).to_beats(4) == [AxiStreamBeat(0x03020100, True)]
+    assert AxiStreamPacket(bytes(range(4))).to_beats(4) == [AxiStreamBeat(data=0x03020100, last=True)]
 
 def test_to_beats_last_on_final_beat():
     assert AxiStreamPacket(bytes(range(8))).to_beats(4) == [
-        AxiStreamBeat(0x03020100, False),
-        AxiStreamBeat(0x07060504, True),
+        AxiStreamBeat(data=0x03020100, last=False),
+        AxiStreamBeat(data=0x07060504, last=True),
     ]
 
 def test_to_beats_rejects_empty():
@@ -25,8 +25,8 @@ def test_from_beats_rejects_empty():
         AxiStreamPacket.from_beats([], 4)
 
 @pytest.mark.parametrize("beats", [
-    [AxiStreamBeat(0, False)],
-    [AxiStreamBeat(0, True), AxiStreamBeat(0, True)],
+    [AxiStreamBeat(data=0, last=False)],
+    [AxiStreamBeat(data=0, last=True), AxiStreamBeat(data=0, last=True)],
 ])
 def test_from_beats_rejects_misplaced_last(beats):
     with pytest.raises(ValueError):

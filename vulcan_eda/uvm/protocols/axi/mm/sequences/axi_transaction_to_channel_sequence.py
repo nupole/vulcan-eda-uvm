@@ -27,11 +27,11 @@ class AxiTransactionToChannelSequence(TranslationSequence):
         txn = upper_item.data
         if self._config.profile is AxiConfig.Profile.LITE and not (txn.num_beats == 1):
             raise ValueError("AXI4-Lite transactions must be a single beat")
-        address = AxiAddress(txn.address, self._config.bytes_per_beat, num_beats=txn.num_beats, id=txn.id, burst=txn.burst)
+        address = AxiAddress(address=txn.address, bytes_per_beat=self._config.bytes_per_beat, num_beats=txn.num_beats, id=txn.id, burst=txn.burst)
         if txn.access is AxiTransaction.Access.WRITE:
             strobe = 2 ** self._config.bytes_per_beat - 1
             address_task = cocotb.start_soon(self._send("aw", (address,), self._sequence_config.awvalid_generator))
-            write_data = [AxiWriteData(data, strobe, last=(beat == txn.num_beats - 1)) for beat, data in enumerate(txn.data)]
+            write_data = [AxiWriteData(data=data, strobe=strobe, last=(beat == txn.num_beats - 1)) for beat, data in enumerate(txn.data)]
             await self._send("w", write_data, self._sequence_config.wvalid_generator)
             await address_task
         else:
