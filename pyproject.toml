@@ -19,19 +19,15 @@ test = [
 
 [tool.setuptools]
 packages = ["vulcan_eda.uvm",
-            "vulcan_eda.uvm.sequences",
-            "vulcan_eda.uvm.signals",
+            "vulcan_eda.uvm.agents",
             "vulcan_eda.uvm.configs",
             "vulcan_eda.uvm.configs.agents",
             "vulcan_eda.uvm.configs.layers",
             "vulcan_eda.uvm.configs.sequences",
+            "vulcan_eda.uvm.drivers",
             "vulcan_eda.uvm.interfaces",
             "vulcan_eda.uvm.layers",
-            "vulcan_eda.uvm.drivers",
             "vulcan_eda.uvm.monitors",
-            "vulcan_eda.uvm.agents",
-            "vulcan_eda.uvm.scoreboards",
-            "vulcan_eda.uvm.subscribers",
             "vulcan_eda.uvm.protocols.axi.mm",
             "vulcan_eda.uvm.protocols.axi.mm.configs",
             "vulcan_eda.uvm.protocols.axi.mm.configs.environments",
@@ -41,11 +37,15 @@ packages = ["vulcan_eda.uvm",
             "vulcan_eda.uvm.protocols.axi.mm.sequences",
             "vulcan_eda.uvm.protocols.axi.mm.subscribers",
             "vulcan_eda.uvm.protocols.axi.stream",
-            "vulcan_eda.uvm.protocols.axi.stream.data",
             "vulcan_eda.uvm.protocols.axi.stream.configs",
             "vulcan_eda.uvm.protocols.axi.stream.configs.sequences",
+            "vulcan_eda.uvm.protocols.axi.stream.data",
             "vulcan_eda.uvm.protocols.axi.stream.sequences",
-            "vulcan_eda.uvm.protocols.axi.stream.subscribers"]
+            "vulcan_eda.uvm.protocols.axi.stream.subscribers",
+            "vulcan_eda.uvm.scoreboards",
+            "vulcan_eda.uvm.sequences",
+            "vulcan_eda.uvm.signals",
+            "vulcan_eda.uvm.subscribers"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

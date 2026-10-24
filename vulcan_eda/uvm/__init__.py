@@ -1,10 +1,10 @@
-import vulcan_eda.uvm.signals
+import vulcan_eda.uvm.agents
 import vulcan_eda.uvm.configs.agents
 import vulcan_eda.uvm.configs.layers
 import vulcan_eda.uvm.configs.sequences
-import vulcan_eda.uvm.sequences
 import vulcan_eda.uvm.interfaces
 import vulcan_eda.uvm.layers
-import vulcan_eda.uvm.agents
 import vulcan_eda.uvm.scoreboards
+import vulcan_eda.uvm.sequences
+import vulcan_eda.uvm.signals
 import vulcan_eda.uvm.subscribers

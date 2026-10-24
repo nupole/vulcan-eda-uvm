@@ -3,9 +3,8 @@ import types
 import cocotb.types
 import pytest
 
-from vulcan_eda.uvm.signals import Constant
-
 from vulcan_eda.uvm.protocols.axi.mm.data import AxiAddress, AxiBurst
+from vulcan_eda.uvm.signals import Constant
 
 def test_defaults_are_a_single_beat_incr_with_id_and_prot_zero():
     address = AxiAddress(0x10, 4)

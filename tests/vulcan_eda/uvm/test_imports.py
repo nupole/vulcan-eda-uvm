@@ -17,3 +17,14 @@ def package_imports():
 
 def test_library_modules_import_from_full_module_paths():
     assert list(package_imports()) == []
+
+def unsorted_imports():
+    for path in sorted(PACKAGE_DIR.rglob("*.py")):
+        tree = ast.parse(path.read_text())
+        modules = [node.module if isinstance(node, ast.ImportFrom) else node.names[0].name for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))]
+        vulcan_eda_modules = [module for module in modules if module and module.startswith("vulcan_eda")]
+        if vulcan_eda_modules != sorted(vulcan_eda_modules):
+            yield f"{path.relative_to(PACKAGE_DIR)} imports vulcan_eda modules out of order"
+
+def test_library_imports_are_sorted():
+    assert list(unsorted_imports()) == []
