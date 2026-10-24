@@ -9,6 +9,7 @@ from vulcan_eda.uvm.protocols.axi.stream.configs.sequences import AxiStreamPacke
 from vulcan_eda.uvm.protocols.axi.stream.data import AxiStreamPacket
 from vulcan_eda.uvm.protocols.axi.stream.sequences.axi_stream_packet_to_beat_sequence import AxiStreamPacketToBeatSequence
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
 from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequence
 
 class CountingValidDataSequence(ValidDataSequence):
@@ -31,7 +32,7 @@ def run(sequencer, upper_sequencer, packets):
 
 def test_sends_each_packet_as_beats(recording_sequencer, upper_sequencer):
     run(recording_sequencer, upper_sequencer, PACKETS)
-    valid_beats = [item.data for item in recording_sequencer.items if item.valid]
+    valid_beats = [item.data for item in recording_sequencer.items if not isinstance(item, IdleSequenceItem)]
     assert valid_beats == PACKETS[0].to_beats(4) + PACKETS[1].to_beats(4)
 
 def test_finishes_each_packet(recording_sequencer, upper_sequencer):
@@ -47,8 +48,8 @@ def test_valid_data_sequence_can_be_overridden(recording_sequencer, upper_sequen
 def test_uses_the_configured_valid_generator(recording_sequencer, upper_sequencer):
     pyuvm.ConfigDB().set(upper_sequencer, "", "axi_stream_packet_to_beat_sequence_config", AxiStreamPacketToBeatSequenceConfig(PatternGenerator((0, 1))))
     run(recording_sequencer, upper_sequencer, PACKETS[1:])
-    assert [item.valid for item in recording_sequencer.items] == [False, True, False]
+    assert [type(item) for item in recording_sequencer.items] == [IdleSequenceItem, DataSequenceItem]
 
-def test_ends_each_packet_with_an_idle(recording_sequencer, upper_sequencer):
+def test_sends_packets_back_to_back_by_default(recording_sequencer, upper_sequencer):
     run(recording_sequencer, upper_sequencer, PACKETS)
-    assert [item.valid for item in recording_sequencer.items] == [True, True, False, True, False]
+    assert [type(item) for item in recording_sequencer.items] == [DataSequenceItem, DataSequenceItem, DataSequenceItem]

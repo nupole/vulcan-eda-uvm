@@ -4,6 +4,8 @@ import pyuvm
 
 from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.generators.constant_generator import ConstantGenerator
+from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
 from vulcan_eda.uvm.sequences.transaction_sequence import TransactionSequence
 
 class ValidDataSequenceItem(pyuvm.uvm_sequence_item):
@@ -40,9 +42,8 @@ class ValidDataSequence(pyuvm.uvm_sequence):
         valids = iter(self._valid_generator)
         for data in self._data_generator:
             while not self._next_valid(valids):
-                await self._send(False, None)
-            await self._send(True, data)
-        await self._send(False, None)
+                await self._send(IdleSequenceItem('idle_sequence_item'))
+            await self._send(DataSequenceItem('data_sequence_item', data))
 
     def _next_valid(self, valids):
         valid = next(valids, None)
@@ -50,8 +51,7 @@ class ValidDataSequence(pyuvm.uvm_sequence):
             raise ValueError("valid_generator ran out before data_generator")
         return valid
 
-    async def _send(self, valid, data):
-        sequence_item = ValidDataSequenceItem('valid_data_sequence_item', valid, data)
+    async def _send(self, sequence_item):
         await self.start_item(sequence_item)
         await self.finish_item(sequence_item)
 
