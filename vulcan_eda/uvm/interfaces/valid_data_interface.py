@@ -8,12 +8,10 @@ class ValidDataInterface(BaseInterface):
         self._valid_interface = DataInterface(clk, valid)
         self._data_interface = DataInterface(clk, data, RandomSignalGenerator(data) if idle_generator is None else idle_generator)
 
-    async def put_data(self, data):
-        await self._write_edge()
+    async def drive_data(self, data):
         self.write_valid_data(1, data)
 
-    async def put_idle(self):
-        await self._write_edge()
+    async def drive_idle(self):
         self.write_idle()
 
     async def get_data(self):

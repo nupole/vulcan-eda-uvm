@@ -1,9 +1,11 @@
 import asyncio
 import pathlib
+import random
 import types
 
 import cocotb
 import cocotb.clock
+import cocotb.triggers
 import cocotb_tools.runner
 
 import pytest
@@ -98,30 +100,54 @@ def test_receiver_drives_its_idle_generator_when_idle():
         readies.append(ready.value)
     assert readies == [0, 1, 0, 1]
 
+class HandshakeRecorder(pyuvm.uvm_subscriber):
+    def __init__(self, name, parent):
+        super().__init__(name, parent)
+        self.handshakes = []
+
+    def write(self, ready_valid):
+        ready, valid = ready_valid
+        self.handshakes.append(ready == 1 and valid == 1)
+
 class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
-        upstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(cocotb.top.clk, cocotb.top.upstream_ready, cocotb.top.upstream_valid, cocotb.top.upstream_data)
-        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface))
-        self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
-        downstream_interface = vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface(cocotb.top.clk, cocotb.top.downstream_ready, cocotb.top.downstream_valid, cocotb.top.downstream_data)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface))
-        self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
+        dut = cocotb.top
+        self.upstream_agent = self._create_agent("upstream_agent", vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(dut.clk, dut.upstream_ready, dut.upstream_valid, dut.upstream_data))
+        self.downstream_agent = self._create_agent("downstream_agent", vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface(dut.clk, dut.downstream_ready, dut.downstream_valid, dut.downstream_data))
+        self.handshake_agent = self._create_agent("handshake_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, vulcan_eda.uvm.signals.Bundle(dut.downstream_ready, dut.downstream_valid)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.handshake_recorder = HandshakeRecorder.create("handshake_recorder", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 
     def connect_phase(self):
-        self.upstream_agent.analysis_port.connect(self.scoreboard.expected_data_analysis_fifo.analysis_export)
         self.downstream_agent.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
+        self.handshake_agent.analysis_port.connect(self.handshake_recorder.analysis_export)
+
+    def _create_agent(self, name, interface, is_active=pyuvm.uvm_active_passive_enum.UVM_ACTIVE):
+        pyuvm.ConfigDB().set(self, name, "config", vulcan_eda.uvm.configs.agents.AgentConfig(interface, is_active))
+        return vulcan_eda.uvm.agents.Agent.create(name, self)
 
 @pyuvm.test()
 class ReadyValidDataInterfaceTest(pyuvm.uvm_test):
     def build_phase(self):
         self.env = ReadyValidDataInterfaceEnv("env", self)
-        pyuvm.ConfigDB().set(self, "env.upstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.configs.sequences.TransactionSequenceConfig(txn_pct=50))
-        pyuvm.ConfigDB().set(self, "env.downstream_agent.sequencer", "transaction_sequence_config", vulcan_eda.uvm.configs.sequences.TransactionSequenceConfig(txn_pct=50))
 
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
+        ready_sequence = vulcan_eda.uvm.sequences.DataSequence.create("ready_sequence")
+        ready_sequence.data_generator = vulcan_eda.uvm.generators.RandomBooleanGenerator(50)
+        cocotb.start_soon(ready_sequence.start(self.env.downstream_agent.sequencer))
+        data = [random.getrandbits(8) for _ in range(200)]
+        for value in data:
+            self.env.scoreboard.expected_data_analysis_fifo.analysis_export.write(value)
+        for chunk in range(0, len(data), 50):
+            valid_data_sequence = vulcan_eda.uvm.sequences.ValidDataSequence.create("valid_data_sequence")
+            valid_data_sequence.data_generator = data[chunk:chunk + 50]
+            await valid_data_sequence.start(self.env.upstream_agent.sequencer)
+        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
+        handshakes = self.env.handshake_recorder.handshakes
+        assert sum(handshakes) == len(data)
+        assert any(first and second for first, second in zip(handshakes, handshakes[1:]))
         self.drop_objection()
 
 def test_ready_valid_data_interface(build_dir):

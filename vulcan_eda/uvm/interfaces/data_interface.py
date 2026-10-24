@@ -8,12 +8,10 @@ class DataInterface(BaseInterface):
         self._data = Signal.wrap(data)
         self._idle_iter = iter(HoldGenerator(self._data) if idle_generator is None else idle_generator)
 
-    async def put_data(self, data):
-        await self._write_edge()
+    async def drive_data(self, data):
         self.write_data(data)
 
-    async def put_idle(self):
-        await self._write_edge()
+    async def drive_idle(self):
         self.write_idle()
 
     async def get_data(self):
