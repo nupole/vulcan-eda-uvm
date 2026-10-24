@@ -11,21 +11,26 @@ import vulcan_eda.uvm
 
 from vulcan_eda.uvm.protocols.axi.mm.configs import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.environments import AxiEnvironmentConfig
+from vulcan_eda.uvm.protocols.axi.mm.configs.sequences import AxiTransactionSequenceConfig
 from vulcan_eda.uvm.protocols.axi.mm.data import AxiResponse, AxiTransaction
 from vulcan_eda.uvm.protocols.axi.mm.environments import AxiEnvironment
-from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
+from vulcan_eda.uvm.protocols.axi.mm.sequences import RandomAxiTransactionSequence
 
-DATA = (0x01234567, 0x89ABCDEF, 0xDEADBEEF, 0x0F0F0F0F)
+class RecordingRandomAxiTransactionSequence(RandomAxiTransactionSequence):
+    def _configure(self):
+        super()._configure()
+        self._registers = {}
 
-class AxiTransactionSequence(pyuvm.uvm_sequence):
-    txns = ()
-
-    async def body(self):
-        for txn in self.txns:
-            sequence_item = DataSequenceItem("axi_transaction_sequence_item", txn)
-            await self.start_item(sequence_item)
-            await self.finish_item(sequence_item)
-            await self.get_response()
+    def _get_next_txn(self):
+        txn = super()._get_next_txn()
+        if txn.access is AxiTransaction.Access.WRITE:
+            self._registers[txn.address] = txn.data[0]
+            expected_txn = dataclasses.replace(txn, response=AxiResponse.OKAY)
+        else:
+            expected_txn = dataclasses.replace(txn, data=(self._registers.get(txn.address, 0),), response=AxiResponse.OKAY)
+        for expected_analysis_export in self.expected_analysis_exports:
+            expected_analysis_export.write(expected_txn)
+        return txn
 
 class AxiMmEnv(pyuvm.uvm_env):
     def build_phase(self):
@@ -51,20 +56,12 @@ class AxiMmTest(pyuvm.uvm_test):
     async def run_phase(self):
         self.raise_objection()
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        writes = [AxiTransaction(access=AxiTransaction.Access.WRITE, address=4 * index, data=(data,)) for index, data in enumerate(DATA)]
-        reads = [AxiTransaction(access=AxiTransaction.Access.READ, address=4 * index) for index in range(len(DATA))]
-        for write in writes:
-            self._expect(dataclasses.replace(write, response=AxiResponse.OKAY))
-        for read, data in zip(reads, DATA):
-            self._expect(dataclasses.replace(read, data=(data,), response=AxiResponse.OKAY))
-        axi_transaction_sequence = AxiTransactionSequence.create("axi_transaction_sequence")
-        axi_transaction_sequence.txns = writes + reads
-        await axi_transaction_sequence.start(self.env.axi_environment.sequencer)
+        recording_random_axi_transaction_sequence = RecordingRandomAxiTransactionSequence.create("recording_random_axi_transaction_sequence")
+        recording_random_axi_transaction_sequence.expected_analysis_exports = [
+            scoreboard.expected_data_analysis_fifo.analysis_export for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard)]
+        pyuvm.ConfigDB().set(self.env.axi_environment.sequencer, "", "axi_transaction_sequence_config", AxiTransactionSequenceConfig(num_txn=200))
+        await recording_random_axi_transaction_sequence.start(self.env.axi_environment.sequencer)
         self.drop_objection()
-
-    def _expect(self, txn):
-        for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard):
-            scoreboard.expected_data_analysis_fifo.analysis_export.write(txn)
 
 def test_axi_mm(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')
