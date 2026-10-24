@@ -5,7 +5,8 @@ class ReadyValidDataTransmitterInterface(ReadyValidDataInterface):
         await self.put_valid_data(sequence_item.valid, sequence_item.data)
 
     async def put_valid_data(self, valid, data):
-        await self._valid_data_interface.put_valid_data(valid, self._to_values(data))
+        await self._write_edge()
+        self._valid_data_interface.write_valid_data(valid, self._to_values(data))
         if valid:
             await self._is_consumed()
 

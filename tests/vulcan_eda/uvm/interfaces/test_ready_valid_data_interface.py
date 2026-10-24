@@ -1,3 +1,4 @@
+import asyncio
 import pathlib
 import types
 
@@ -46,6 +47,35 @@ def test_no_data_type_passes_values_through():
     transmitter_interface = vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(None, signal(1), signal(1), signal(2))
     assert transmitter_interface._to_values(2) == 2
     assert transmitter_interface._from_values(2) == 2
+
+class EdgeRecorder:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.write_edges = 0
+
+    async def _write_edge(self):
+        self.write_edges += 1
+
+    async def _read_edge(self):
+        pass
+
+class EdgeRecordingTransmitterInterface(EdgeRecorder, vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface):
+    pass
+
+class EdgeRecordingReceiverInterface(EdgeRecorder, vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface):
+    pass
+
+def test_transmitter_writes_on_its_own_write_edge():
+    valid, data = signal(0), signal(0)
+    transmitter_interface = EdgeRecordingTransmitterInterface(None, signal(1), valid, data)
+    asyncio.run(transmitter_interface.put_valid_data(1, 5))
+    assert (transmitter_interface.write_edges, valid.value, data.value) == (1, 1, 5)
+
+def test_receiver_writes_on_its_own_write_edge():
+    ready = signal(0)
+    receiver_interface = EdgeRecordingReceiverInterface(None, ready, signal(0), signal(0))
+    asyncio.run(receiver_interface.put_ready(1))
+    assert (receiver_interface.write_edges, ready.value) == (1, 1)
 
 class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):

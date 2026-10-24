@@ -5,4 +5,5 @@ class ReadyValidDataReceiverInterface(ReadyValidDataInterface):
         await self.put_ready(sequence_item.data)
 
     async def put_ready(self, ready):
-        await self._ready_interface.put_data(ready)
+        await self._write_edge()
+        self._ready_interface.write_data(ready)
