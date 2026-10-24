@@ -11,7 +11,7 @@ class AxiStreamBeatToPacketSubscriber(TranslationSubscriber):
         self._num_bytes = config.num_bytes
         self._beats = []
 
-    def _translate(self, channel, beat):
+    def translate(self, channel, beat):
         self._beats.append(beat)
         if beat.last:
             yield AxiStreamPacket.from_beats(self._beats, self._num_bytes)

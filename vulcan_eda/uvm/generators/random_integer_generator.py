@@ -11,5 +11,5 @@ class RandomIntegerGenerator(RandomGenerator):
         if not (self.min_value <= self.max_value):
             raise ValueError("min_value must not be greater than max_value")
 
-    def _next(self, rng):
+    def next_value(self, rng):
         return rng.randint(self.min_value, self.max_value)

@@ -14,7 +14,7 @@ class AxiChannelToTransactionSubscriber(TranslationSubscriber):
         self._read_addresses = collections.deque()
         self._read_beats = []
 
-    def _translate(self, channel, lower_item):
+    def translate(self, channel, lower_item):
         if channel == "aw":
             self._write_addresses.append(lower_item)
         elif channel == "w":

@@ -10,5 +10,5 @@ class RandomBooleanGenerator(RandomGenerator):
         if not (0 < self.pct_true <= 100):
             raise ValueError("pct_true must be greater than 0 and at most 100")
 
-    def _next(self, rng):
+    def next_value(self, rng):
         return rng.random() * 100 < self.pct_true

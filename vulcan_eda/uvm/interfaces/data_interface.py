@@ -15,7 +15,7 @@ class DataInterface(BaseInterface):
         self.write_idle()
 
     async def get_data(self):
-        await self._read_edge()
+        await self.read_edge()
         return self.read_data()
 
     def read_data(self):

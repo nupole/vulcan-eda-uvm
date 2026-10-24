@@ -18,12 +18,12 @@ from vulcan_eda.uvm.protocols.axi.mm.environments import AxiEnvironment
 from vulcan_eda.uvm.protocols.axi.mm.sequences import RandomAxiTransactionSequence
 
 class RecordingRandomAxiTransactionSequence(RandomAxiTransactionSequence):
-    def _configure(self):
-        super()._configure()
+    def configure(self):
+        super().configure()
         self._registers = {}
 
-    def _get_next_txn(self):
-        txn = super()._get_next_txn()
+    def get_next_txn(self):
+        txn = super().get_next_txn()
         if txn.access is AxiTransaction.Access.WRITE:
             self._registers[txn.address] = txn.data[0]
             expected_txn = dataclasses.replace(txn, response=AxiResponse.OKAY)

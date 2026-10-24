@@ -22,8 +22,8 @@ from vulcan_eda.uvm.protocols.axi.stream.subscribers import AxiStreamBeatToPacke
 from vulcan_eda.uvm.sequences import DataSequence
 
 class RecordingRandomAxiStreamPacketSequence(RandomAxiStreamPacketSequence):
-    def _get_next_packet(self):
-        packet = super()._get_next_packet()
+    def get_next_packet(self):
+        packet = super().get_next_packet()
         self.expected_analysis_export.write(packet)
         return packet
 

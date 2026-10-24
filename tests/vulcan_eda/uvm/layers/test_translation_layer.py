@@ -23,7 +23,7 @@ class ResponseUsingTranslationSequence(StartRecordingTranslationSequence):
 class DoublingTranslationSubscriber(TranslationSubscriber):
     channels = ("lower",)
 
-    def _translate(self, channel, lower_item):
+    def translate(self, channel, lower_item):
         return [lower_item, lower_item]
 
 @dataclasses.dataclass(frozen=True)

@@ -7,15 +7,12 @@ class BaseInterface(abc.ABC):
         self._clk = clk
 
     async def put_data(self, data):
-        await self._write_edge()
+        await self.write_edge()
         await self.drive_data(data)
 
     async def put_idle(self):
-        await self._write_edge()
+        await self.write_edge()
         await self.drive_idle()
-
-    async def write_edge(self):
-        await self._write_edge()
 
     @abc.abstractmethod
     async def drive_data(self, data):
@@ -29,8 +26,8 @@ class BaseInterface(abc.ABC):
     async def get_data(self):
         ...
 
-    async def _write_edge(self):
+    async def write_edge(self):
         await cocotb.triggers.RisingEdge(self._clk)
 
-    async def _read_edge(self):
+    async def read_edge(self):
         await cocotb.triggers.FallingEdge(self._clk)

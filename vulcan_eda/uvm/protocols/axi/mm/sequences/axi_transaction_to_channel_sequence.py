@@ -17,7 +17,7 @@ class AxiTransactionToChannelSequence(TranslationSequence):
         self._ready_started = False
         await super().body()
 
-    async def _translate(self, upper_item):
+    async def translate(self, upper_item):
         self._config = AxiConfig.get(self.upper_sequencer)
         self._sequence_config = AxiTransactionToChannelSequenceConfig.get(self.upper_sequencer)
         if not self._ready_started:

@@ -8,7 +8,7 @@ from vulcan_eda.uvm.protocols.axi.mm.data.axi_transaction import AxiTransaction
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 
 class AxiTransactionSequence(pyuvm.uvm_sequence):
-    def _configure(self):
+    def configure(self):
         config = AxiTransactionSequenceConfig.get(self.sequencer)
         self.num_txn = config.num_txn
         self.write_pct = config.write_pct
@@ -21,25 +21,25 @@ class AxiTransactionSequence(pyuvm.uvm_sequence):
             self.max_address = config.max_address
 
     async def body(self):
-        self._configure()
+        self.configure()
         for _ in range(self.num_txn):
-            sequence_item = DataSequenceItem('axi_transaction_sequence_item', self._get_next_txn())
+            sequence_item = DataSequenceItem('axi_transaction_sequence_item', self.get_next_txn())
             await self.start_item(sequence_item)
             await self.finish_item(sequence_item)
             await self.get_response()
 
-    def _get_next_txn(self):
+    def get_next_txn(self):
         raise NotImplementedError
 
 class RandomAxiTransactionSequence(AxiTransactionSequence):
-    def _configure(self):
-        super()._configure()
+    def configure(self):
+        super().configure()
         self._min_beat_address = -(-self.min_address // self._bytes_per_beat)
         self._max_beat_address = self.max_address // self._bytes_per_beat
         if not (self._min_beat_address <= self._max_beat_address):
             raise ValueError(f"no {self._bytes_per_beat}-byte aligned address between min_address and max_address")
 
-    def _get_next_txn(self):
+    def get_next_txn(self):
         address = random.randint(self._min_beat_address, self._max_beat_address) * self._bytes_per_beat
         if random.randint(1, 100) <= self.write_pct:
             data = random.getrandbits(8 * self._bytes_per_beat)

@@ -8,7 +8,7 @@ from vulcan_eda.uvm.generators import RandomGenerator
 
 @dataclasses.dataclass(frozen=True)
 class WordGenerator(RandomGenerator):
-    def _next(self, rng):
+    def next_value(self, rng):
         return rng.getrandbits(32)
 
 def take(generator, count):
@@ -36,6 +36,6 @@ def test_seed_is_keyword_only():
     with pytest.raises(TypeError):
         WordGenerator(1)
 
-def test_next_must_be_overridden():
+def test_next_value_must_be_overridden():
     with pytest.raises(NotImplementedError):
         next(iter(RandomGenerator()))

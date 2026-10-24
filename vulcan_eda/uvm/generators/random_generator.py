@@ -8,7 +8,7 @@ class RandomGenerator:
     def __iter__(self):
         rng = random.Random(random.getrandbits(64) if self.seed is None else self.seed)
         while True:
-            yield self._next(rng)
+            yield self.next_value(rng)
 
-    def _next(self, rng):
+    def next_value(self, rng):
         raise NotImplementedError

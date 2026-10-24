@@ -16,7 +16,7 @@ class ValidDataInterface(BaseInterface):
 
     async def get_data(self):
         while True:
-            await self._read_edge()
+            await self.read_edge()
             valid, data = self.read_valid_data()
             if valid == 1:
                 return data

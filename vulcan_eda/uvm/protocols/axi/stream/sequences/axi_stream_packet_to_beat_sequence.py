@@ -6,7 +6,7 @@ from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequence
 class AxiStreamPacketToBeatSequence(TranslationSequence):
     channels = ("stream",)
 
-    async def _translate(self, upper_item):
+    async def translate(self, upper_item):
         config = AxiStreamConfig.get(self.upper_sequencer)
         sequence_config = AxiStreamPacketToBeatSequenceConfig.get(self.upper_sequencer)
         valid_data_sequence = ValidDataSequence.create("valid_data_sequence")

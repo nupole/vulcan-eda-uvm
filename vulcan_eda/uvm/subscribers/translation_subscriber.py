@@ -16,8 +16,8 @@ class TranslationSubscriber(pyuvm.uvm_component):
         self.analysis_port = pyuvm.uvm_analysis_port("analysis_port", self)
 
     def write(self, channel, lower_item):
-        for upper_item in self._translate(channel, lower_item):
+        for upper_item in self.translate(channel, lower_item):
             self.analysis_port.write(upper_item)
 
-    def _translate(self, channel, lower_item):
+    def translate(self, channel, lower_item):
         raise NotImplementedError

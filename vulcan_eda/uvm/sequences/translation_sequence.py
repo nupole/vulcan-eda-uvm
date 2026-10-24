@@ -15,7 +15,7 @@ class TranslationSequence(pyuvm.uvm_sequence):
     async def body(self):
         while True:
             upper_item = await self.upper_sequencer.get_next_item()
-            response = await self._translate(upper_item)
+            response = await self.translate(upper_item)
             if response is None:
                 self.upper_sequencer.seq_item_export.item_done()
             else:
@@ -23,5 +23,5 @@ class TranslationSequence(pyuvm.uvm_sequence):
                 response_item.set_id_info(upper_item)
                 self.upper_sequencer.seq_item_export.item_done(response_item)
 
-    async def _translate(self, upper_item):
+    async def translate(self, upper_item):
         raise NotImplementedError

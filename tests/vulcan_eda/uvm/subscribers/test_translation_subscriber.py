@@ -6,7 +6,7 @@ class ChannelTaggingTranslationSubscriber(TranslationSubscriber):
     channels = ("x", "y")
     copies = 1
 
-    def _translate(self, channel, lower_item):
+    def translate(self, channel, lower_item):
         return [(channel, lower_item)] * self.copies
 
 def build(recording_subscriber, copies):
@@ -31,4 +31,4 @@ def test_publishes_nothing_until_translation_completes(recording_subscriber):
 
 def test_translate_must_be_overridden():
     with pytest.raises(NotImplementedError):
-        TranslationSubscriber.create("translation_subscriber", None)._translate("x", "a")
+        TranslationSubscriber.create("translation_subscriber", None).translate("x", "a")

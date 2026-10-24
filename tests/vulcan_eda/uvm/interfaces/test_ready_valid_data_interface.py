@@ -55,10 +55,10 @@ class EdgeRecorder:
         super().__init__(*args, **kwargs)
         self.write_edges = 0
 
-    async def _write_edge(self):
+    async def write_edge(self):
         self.write_edges += 1
 
-    async def _read_edge(self):
+    async def read_edge(self):
         pass
 
 class EdgeRecordingTransmitterInterface(EdgeRecorder, vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface):

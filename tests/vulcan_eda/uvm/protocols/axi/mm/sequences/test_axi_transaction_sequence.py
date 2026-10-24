@@ -10,8 +10,8 @@ def txns(axi_transaction_sequence_config=None, address_width=8):
     if axi_transaction_sequence_config is not None:
         axi_transaction_sequence_config.set(None)
     random_axi_transaction_sequence = RandomAxiTransactionSequence.create("random_axi_transaction_sequence")
-    random_axi_transaction_sequence._configure()
-    return [random_axi_transaction_sequence._get_next_txn() for _ in range(200)]
+    random_axi_transaction_sequence.configure()
+    return [random_axi_transaction_sequence.get_next_txn() for _ in range(200)]
 
 def test_addresses_are_aligned_and_in_range():
     addresses = {txn.address for txn in txns(AxiTransactionSequenceConfig(min_address=5, max_address=19))}
@@ -39,4 +39,4 @@ def test_rejects_range_without_aligned_address():
 
 def test_get_next_txn_must_be_overridden():
     with pytest.raises(NotImplementedError):
-        AxiTransactionSequence.create("axi_transaction_sequence")._get_next_txn()
+        AxiTransactionSequence.create("axi_transaction_sequence").get_next_txn()

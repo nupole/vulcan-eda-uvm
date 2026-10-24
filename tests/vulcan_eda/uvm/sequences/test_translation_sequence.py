@@ -10,11 +10,11 @@ class RecordingTranslationSequence(TranslationSequence):
         super().__init__(name)
         self.translations = []
 
-    async def _translate(self, upper_item):
+    async def translate(self, upper_item):
         self.translations.append((upper_item, list(self.upper_sequencer.done_items)))
 
 class RespondingTranslationSequence(TranslationSequence):
-    async def _translate(self, upper_item):
+    async def translate(self, upper_item):
         return f"response to {upper_item.data}"
 
 def run(translation_sequence, upper_sequencer, items):
@@ -44,4 +44,4 @@ def test_sends_each_response_matched_to_its_request(upper_sequencer):
 def test_translate_must_be_overridden():
     translation_sequence = TranslationSequence("translation_sequence")
     with pytest.raises(NotImplementedError):
-        asyncio.run(translation_sequence._translate("a"))
+        asyncio.run(translation_sequence.translate("a"))

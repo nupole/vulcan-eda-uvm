@@ -10,5 +10,5 @@ class RandomBitsGenerator(RandomGenerator):
         if not (self.width > 0):
             raise ValueError("width must be positive")
 
-    def _next(self, rng):
+    def next_value(self, rng):
         return rng.getrandbits(self.width)

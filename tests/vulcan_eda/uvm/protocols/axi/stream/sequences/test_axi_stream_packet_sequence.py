@@ -33,4 +33,4 @@ def test_packets_are_whole_beats_in_range(sequencer):
 
 def test_get_next_packet_must_be_overridden():
     with pytest.raises(NotImplementedError):
-        AxiStreamPacketSequence.create("axi_stream_packet_sequence")._get_next_packet()
+        AxiStreamPacketSequence.create("axi_stream_packet_sequence").get_next_packet()

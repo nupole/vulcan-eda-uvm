@@ -21,7 +21,7 @@ class ReadyValidDataInterface(BaseInterface):
 
     async def _is_consumed(self):
         while True:
-            await self._read_edge()
+            await self.read_edge()
             ready, valid, data = self.read_ready_valid_data()
             if ready == 1 and valid == 1:
                 return data
