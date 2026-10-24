@@ -8,5 +8,6 @@ from vulcan_eda.uvm.generators.random_bits_generator import RandomBitsGenerator
 from vulcan_eda.uvm.generators.random_boolean_generator import RandomBooleanGenerator
 from vulcan_eda.uvm.generators.random_generator import RandomGenerator
 from vulcan_eda.uvm.generators.random_integer_generator import RandomIntegerGenerator
+from vulcan_eda.uvm.generators.random_signal_generator import RandomSignalGenerator
 from vulcan_eda.uvm.generators.time_generator import TimeGenerator
 from vulcan_eda.uvm.generators.walking_one_hot_generator import WalkingOneHotGenerator
