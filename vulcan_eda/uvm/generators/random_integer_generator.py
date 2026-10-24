@@ -1,17 +1,15 @@
 import dataclasses
-import random
+
+from vulcan_eda.uvm.generators.random_generator import RandomGenerator
 
 @dataclasses.dataclass(frozen=True)
-class RandomIntegerGenerator:
+class RandomIntegerGenerator(RandomGenerator):
     min_value: int
     max_value: int
-    seed: int | None = None
 
     def __post_init__(self):
         if not (self.min_value <= self.max_value):
             raise ValueError("min_value must not be greater than max_value")
 
-    def __iter__(self):
-        rng = random.Random(random.getrandbits(64) if self.seed is None else self.seed)
-        while True:
-            yield rng.randint(self.min_value, self.max_value)
+    def _next(self, rng):
+        return rng.randint(self.min_value, self.max_value)
