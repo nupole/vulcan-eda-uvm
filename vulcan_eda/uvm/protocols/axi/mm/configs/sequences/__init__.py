@@ -1,1 +1,2 @@
 from vulcan_eda.uvm.protocols.axi.mm.configs.sequences.axi_transaction_sequence_config import AxiTransactionSequenceConfig
+from vulcan_eda.uvm.protocols.axi.mm.configs.sequences.axi_transaction_to_channel_sequence_config import AxiTransactionToChannelSequenceConfig

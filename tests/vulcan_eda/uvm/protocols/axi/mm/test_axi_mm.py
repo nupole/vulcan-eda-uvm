@@ -9,9 +9,10 @@ import pyuvm
 
 import vulcan_eda.uvm
 
+from vulcan_eda.uvm.generators import RandomBooleanGenerator
 from vulcan_eda.uvm.protocols.axi.mm.configs import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.environments import AxiEnvironmentConfig
-from vulcan_eda.uvm.protocols.axi.mm.configs.sequences import AxiTransactionSequenceConfig
+from vulcan_eda.uvm.protocols.axi.mm.configs.sequences import AxiTransactionSequenceConfig, AxiTransactionToChannelSequenceConfig
 from vulcan_eda.uvm.protocols.axi.mm.data import AxiResponse, AxiTransaction
 from vulcan_eda.uvm.protocols.axi.mm.environments import AxiEnvironment
 from vulcan_eda.uvm.protocols.axi.mm.sequences import RandomAxiTransactionSequence
@@ -60,6 +61,9 @@ class AxiMmTest(pyuvm.uvm_test):
         recording_random_axi_transaction_sequence.expected_analysis_exports = [
             scoreboard.expected_data_analysis_fifo.analysis_export for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard)]
         pyuvm.ConfigDB().set(self.env.axi_environment.sequencer, "", "axi_transaction_sequence_config", AxiTransactionSequenceConfig(num_txn=200))
+        pyuvm.ConfigDB().set(self.env.axi_environment.sequencer, "", "axi_transaction_to_channel_sequence_config", AxiTransactionToChannelSequenceConfig(
+            awvalid_generator=RandomBooleanGenerator(50), wvalid_generator=RandomBooleanGenerator(50), bready_generator=RandomBooleanGenerator(50),
+            arvalid_generator=RandomBooleanGenerator(50), rready_generator=RandomBooleanGenerator(50)))
         await recording_random_axi_transaction_sequence.start(self.env.axi_environment.sequencer)
         self.drop_objection()
 
