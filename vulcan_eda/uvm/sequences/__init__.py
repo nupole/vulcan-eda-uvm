@@ -1,2 +1,2 @@
 from vulcan_eda.uvm.sequences.data_sequence import DataSequence, IterableDataSequence, RandomDataSequence
-from vulcan_eda.uvm.sequences.valid_data_sequence import IterableValidDataSequence, RandomValidDataSequence
+from vulcan_eda.uvm.sequences.valid_data_sequence import IterableValidDataSequence, RandomValidDataSequence, ValidDataSequence
