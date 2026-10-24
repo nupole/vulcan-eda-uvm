@@ -1,1 +1,2 @@
+from vulcan_eda.uvm.protocols.axi.mm.sequences.axi_transaction_sequence import AxiTransactionSequence, RandomAxiTransactionSequence
 from vulcan_eda.uvm.protocols.axi.mm.sequences.axi_transaction_to_channel_sequence import AxiTransactionToChannelSequence
