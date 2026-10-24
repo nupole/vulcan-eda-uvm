@@ -1,5 +1,6 @@
 import pyuvm
 
+from vulcan_eda.uvm.configs.agents.agent_config import AgentConfig
 from vulcan_eda.uvm.drivers.driver import Driver
 from vulcan_eda.uvm.monitors.monitor import Monitor
 
@@ -7,16 +8,16 @@ class Agent(pyuvm.uvm_agent):
     def build_phase(self):
         super().build_phase()
 
-        config = pyuvm.ConfigDB().get(self, "", "config")
+        config = AgentConfig.get(self)
         self.is_active = config.is_active
 
         if self.active():
             self.sequencer = pyuvm.uvm_sequencer.create("sequencer", self)
 
-            pyuvm.ConfigDB().set(self, "driver", "interface", config.interface)
+            config.set(self, "driver")
             self._driver = Driver.create("driver", self)
 
-        pyuvm.ConfigDB().set(self, "monitor", "interface", config.interface)
+        config.set(self, "monitor")
         self._monitor = Monitor.create("monitor", self)
 
         self.analysis_port = pyuvm.uvm_analysis_port("analysis_port", self)

@@ -42,10 +42,10 @@ def test_data_is_driven_with_valid_high():
 class ValidDataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
         upstream_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.upstream_valid, cocotb.top.upstream_data)
-        pyuvm.ConfigDB().set(self, "upstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface))
+        vulcan_eda.uvm.configs.agents.AgentConfig(upstream_interface).set(self, "upstream_agent")
         self.upstream_agent = vulcan_eda.uvm.agents.Agent.create("upstream_agent", self)
         downstream_interface = vulcan_eda.uvm.interfaces.ValidDataInterface(cocotb.top.clk, cocotb.top.downstream_valid, cocotb.top.downstream_data)
-        pyuvm.ConfigDB().set(self, "downstream_agent", "config", vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE))
+        vulcan_eda.uvm.configs.agents.AgentConfig(downstream_interface, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "downstream_agent")
         self.downstream_agent = vulcan_eda.uvm.agents.Agent.create("downstream_agent", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 

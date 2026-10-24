@@ -2,17 +2,18 @@ import random
 
 import pyuvm
 
+from vulcan_eda.uvm.protocols.axi.stream.configs.axi_stream_config import AxiStreamConfig
 from vulcan_eda.uvm.protocols.axi.stream.configs.sequences.axi_stream_packet_sequence_config import AxiStreamPacketSequenceConfig
 from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 
 class AxiStreamPacketSequence(pyuvm.uvm_sequence):
     def _configure(self):
-        config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_stream_packet_sequence_config", AxiStreamPacketSequenceConfig())
+        config = AxiStreamPacketSequenceConfig.get(self.sequencer)
         self.num_packets = config.num_packets
         self.min_num_beats = config.min_num_beats
         self.max_num_beats = config.max_num_beats
-        axi_stream_config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_stream_config")
+        axi_stream_config = AxiStreamConfig.get(self.sequencer)
         self._num_bytes = axi_stream_config.num_bytes
 
     async def body(self):

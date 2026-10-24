@@ -1,10 +1,12 @@
 import pyuvm
 
+from vulcan_eda.uvm.configs.layers.translation_layer_config import TranslationLayerConfig
+
 class TranslationLayer(pyuvm.uvm_component):
     def build_phase(self):
         self.lower_sequencers = {}
         self.responses = None
-        self._config = pyuvm.ConfigDB().get(self, "", "config")
+        self._config = TranslationLayerConfig.get(self)
         if self._config.translation_sequence_type is not None:
             self.sequencer = pyuvm.uvm_sequencer.create("sequencer", self)
             self._forward_configs(self.sequencer)
@@ -45,5 +47,5 @@ class TranslationLayer(pyuvm.uvm_component):
         await translation_sequence.start()
 
     def _forward_configs(self, component):
-        for key, config in self._config.forwarded_configs.items():
-            pyuvm.ConfigDB().set(component, "", key, config)
+        for forwarded_config in self._config.forwarded_configs:
+            forwarded_config.set(component)

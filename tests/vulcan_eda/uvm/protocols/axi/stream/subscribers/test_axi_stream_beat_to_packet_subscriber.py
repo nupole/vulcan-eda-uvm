@@ -8,7 +8,7 @@ from vulcan_eda.uvm.protocols.axi.stream.subscribers import AxiStreamBeatToPacke
 PACKETS = [AxiStreamPacket(bytes(range(8))), AxiStreamPacket(bytes(range(8, 12)))]
 
 def build(recording_subscriber):
-    pyuvm.ConfigDB().set(None, "axi_stream_beat_to_packet_subscriber", "axi_stream_config", AxiStreamConfig(num_bytes=4))
+    AxiStreamConfig(num_bytes=4).set(None, "axi_stream_beat_to_packet_subscriber")
     axi_stream_beat_to_packet_subscriber = AxiStreamBeatToPacketSubscriber.create("axi_stream_beat_to_packet_subscriber", None)
     axi_stream_beat_to_packet_subscriber.build_phase()
     axi_stream_beat_to_packet_subscriber.analysis_port.connect(recording_subscriber.analysis_export)

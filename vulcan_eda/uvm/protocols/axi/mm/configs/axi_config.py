@@ -1,8 +1,10 @@
 import dataclasses
 import enum
 
+from vulcan_eda.uvm.configs.base_config import BaseConfig
+
 @dataclasses.dataclass(frozen=True)
-class AxiConfig:
+class AxiConfig(BaseConfig):
     class Profile(enum.Enum):
         LITE = enum.auto()
 

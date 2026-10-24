@@ -7,6 +7,7 @@ from vulcan_eda.uvm.interfaces.ready_valid_data_receiver_interface import ReadyV
 from vulcan_eda.uvm.interfaces.ready_valid_data_transmitter_interface import ReadyValidDataTransmitterInterface
 from vulcan_eda.uvm.layers.translation_layer import TranslationLayer
 from vulcan_eda.uvm.protocols.axi.mm.configs.axi_config import AxiConfig
+from vulcan_eda.uvm.protocols.axi.mm.configs.environments.axi_environment_config import AxiEnvironmentConfig
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_address import AxiAddress
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_read_data import AxiReadData
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_write_data import AxiWriteData
@@ -17,20 +18,20 @@ from vulcan_eda.uvm.signals.constant import Constant
 
 class AxiEnvironment(pyuvm.uvm_env):
     def build_phase(self):
-        self._config = pyuvm.ConfigDB().get(self, "", "config")
+        self._config = AxiEnvironmentConfig.get(self)
         axi_config = AxiConfig.from_pins(self._config.profile, self._config.wdata, self._config.awaddr)
         self._agents = {}
         for channel, interface in self._interfaces(axi_config).items():
-            pyuvm.ConfigDB().set(self, f"{channel}_agent", "config", AgentConfig(interface, self._config.is_active))
+            AgentConfig(interface, self._config.is_active).set(self, f"{channel}_agent")
             self._agents[channel] = Agent.create(f"{channel}_agent", self)
         if self._config.is_active is pyuvm.uvm_active_passive_enum.UVM_ACTIVE:
             translation_sequence_type = AxiTransactionToChannelSequence
         else:
             translation_sequence_type = None
-        pyuvm.ConfigDB().set(self, "layer", "config", TranslationLayerConfig(
+        TranslationLayerConfig(
             translation_sequence_type=translation_sequence_type,
             translation_subscriber_type=AxiChannelToTransactionSubscriber,
-            forwarded_configs={"axi_config": axi_config}))
+            forwarded_configs=(axi_config,)).set(self, "layer")
         self._layer = TranslationLayer.create("layer", self)
         self.analysis_port = pyuvm.uvm_analysis_port("analysis_port", self)
 

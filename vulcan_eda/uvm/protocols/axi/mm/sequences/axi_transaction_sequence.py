@@ -2,16 +2,17 @@ import random
 
 import pyuvm
 
+from vulcan_eda.uvm.protocols.axi.mm.configs.axi_config import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.sequences.axi_transaction_sequence_config import AxiTransactionSequenceConfig
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_transaction import AxiTransaction
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 
 class AxiTransactionSequence(pyuvm.uvm_sequence):
     def _configure(self):
-        config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_transaction_sequence_config", AxiTransactionSequenceConfig())
+        config = AxiTransactionSequenceConfig.get(self.sequencer)
         self.num_txn = config.num_txn
         self.write_pct = config.write_pct
-        axi_config = pyuvm.ConfigDB().get(self.sequencer, "", "axi_config")
+        axi_config = AxiConfig.get(self.sequencer)
         self._bytes_per_beat = axi_config.bytes_per_beat
         self.min_address = config.min_address
         if config.max_address is None:

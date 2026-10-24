@@ -22,7 +22,7 @@ class CountingValidDataSequence(ValidDataSequence):
 PACKETS = [AxiStreamPacket(bytes(range(8))), AxiStreamPacket(bytes(range(8, 12)))]
 
 def run(sequencer, upper_sequencer, packets):
-    pyuvm.ConfigDB().set(upper_sequencer, "", "axi_stream_config", AxiStreamConfig(num_bytes=4))
+    AxiStreamConfig(num_bytes=4).set(upper_sequencer)
     upper_sequencer.items.extend(DataSequenceItem("packet", packet) for packet in packets)
     axi_stream_packet_to_beat_sequence = AxiStreamPacketToBeatSequence.create("axi_stream_packet_to_beat_sequence")
     axi_stream_packet_to_beat_sequence.upper_sequencer = upper_sequencer
@@ -46,7 +46,7 @@ def test_valid_data_sequence_can_be_overridden(recording_sequencer, upper_sequen
     assert CountingValidDataSequence.starts == len(PACKETS)
 
 def test_uses_the_configured_valid_generator(recording_sequencer, upper_sequencer):
-    pyuvm.ConfigDB().set(upper_sequencer, "", "axi_stream_packet_to_beat_sequence_config", AxiStreamPacketToBeatSequenceConfig(PatternGenerator((0, 1))))
+    AxiStreamPacketToBeatSequenceConfig(PatternGenerator((0, 1))).set(upper_sequencer)
     run(recording_sequencer, upper_sequencer, PACKETS[1:])
     assert [type(item) for item in recording_sequencer.items] == [IdleSequenceItem, DataSequenceItem]
 

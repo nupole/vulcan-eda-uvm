@@ -3,10 +3,11 @@ import typing
 
 import pyuvm
 
+from vulcan_eda.uvm.configs.base_config import BaseConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.axi_config import AxiConfig
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class AxiEnvironmentConfig:
+class AxiEnvironmentConfig(BaseConfig):
     clk: typing.Any
     profile: AxiConfig.Profile
     is_active: pyuvm.uvm_active_passive_enum = pyuvm.uvm_active_passive_enum.UVM_ACTIVE

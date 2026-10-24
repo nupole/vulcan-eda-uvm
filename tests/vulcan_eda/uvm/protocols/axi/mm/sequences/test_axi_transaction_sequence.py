@@ -1,5 +1,4 @@
 import pytest
-import pyuvm
 
 from vulcan_eda.uvm.protocols.axi.mm.configs import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.sequences import AxiTransactionSequenceConfig
@@ -7,9 +6,9 @@ from vulcan_eda.uvm.protocols.axi.mm.data import AxiTransaction
 from vulcan_eda.uvm.protocols.axi.mm.sequences import AxiTransactionSequence, RandomAxiTransactionSequence
 
 def txns(axi_transaction_sequence_config=None, address_width=8):
-    pyuvm.ConfigDB().set(None, "", "axi_config", AxiConfig(AxiConfig.Profile.LITE, bytes_per_beat=4, address_width=address_width))
+    AxiConfig(AxiConfig.Profile.LITE, bytes_per_beat=4, address_width=address_width).set(None)
     if axi_transaction_sequence_config is not None:
-        pyuvm.ConfigDB().set(None, "", "axi_transaction_sequence_config", axi_transaction_sequence_config)
+        axi_transaction_sequence_config.set(None)
     random_axi_transaction_sequence = RandomAxiTransactionSequence.create("random_axi_transaction_sequence")
     random_axi_transaction_sequence._configure()
     return [random_axi_transaction_sequence._get_next_txn() for _ in range(200)]

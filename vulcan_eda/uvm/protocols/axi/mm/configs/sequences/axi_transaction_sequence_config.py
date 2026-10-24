@@ -1,7 +1,9 @@
 import dataclasses
 
+from vulcan_eda.uvm.configs.base_config import BaseConfig
+
 @dataclasses.dataclass(frozen=True)
-class AxiTransactionSequenceConfig:
+class AxiTransactionSequenceConfig(BaseConfig):
     num_txn: int = 10
     write_pct: int = 50
     min_address: int = 0

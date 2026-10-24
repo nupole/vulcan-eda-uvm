@@ -1,5 +1,4 @@
 import cocotb
-import pyuvm
 
 from vulcan_eda.uvm.protocols.axi.mm.configs.axi_config import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.sequences.axi_transaction_to_channel_sequence_config import AxiTransactionToChannelSequenceConfig
@@ -19,8 +18,8 @@ class AxiTransactionToChannelSequence(TranslationSequence):
         await super().body()
 
     async def _translate(self, upper_item):
-        self._config = pyuvm.ConfigDB().get(self.upper_sequencer, "", "axi_config")
-        self._sequence_config = pyuvm.ConfigDB().get(self.upper_sequencer, "", "axi_transaction_to_channel_sequence_config", AxiTransactionToChannelSequenceConfig())
+        self._config = AxiConfig.get(self.upper_sequencer)
+        self._sequence_config = AxiTransactionToChannelSequenceConfig.get(self.upper_sequencer)
         if not self._ready_started:
             self._start_ready("b", self._sequence_config.bready_generator)
             self._start_ready("r", self._sequence_config.rready_generator)

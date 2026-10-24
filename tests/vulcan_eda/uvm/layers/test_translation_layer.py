@@ -1,8 +1,10 @@
 import asyncio
+import dataclasses
 
 import pytest
 import pyuvm
 
+from vulcan_eda.uvm.configs import BaseConfig
 from vulcan_eda.uvm.configs.layers import TranslationLayerConfig
 from vulcan_eda.uvm.layers import TranslationLayer
 from vulcan_eda.uvm.sequences.translation_sequence import TranslationSequence
@@ -24,11 +26,14 @@ class DoublingTranslationSubscriber(TranslationSubscriber):
     def _translate(self, channel, lower_item):
         return [lower_item, lower_item]
 
-FORWARDED_CONFIG = object()
+@dataclasses.dataclass(frozen=True)
+class ForwardedConfig(BaseConfig):
+    value: int
+
+FORWARDED_CONFIG = ForwardedConfig(1)
 
 def build(**translation_types):
-    config = TranslationLayerConfig(**translation_types, forwarded_configs={"forwarded_config": FORWARDED_CONFIG})
-    pyuvm.ConfigDB().set(None, "translation_layer", "config", config)
+    TranslationLayerConfig(**translation_types, forwarded_configs=(FORWARDED_CONFIG,)).set(None, "translation_layer")
     translation_layer = TranslationLayer.create("translation_layer", None)
     translation_layer.build_phase()
     return translation_layer
@@ -45,13 +50,13 @@ def build_monitoring(recording_subscriber):
 
 def test_forwards_configs_to_its_sequencer():
     translation_layer = build_stimulus()
-    assert pyuvm.ConfigDB().get(translation_layer.sequencer, "", "forwarded_config") is FORWARDED_CONFIG
+    assert ForwardedConfig.get(translation_layer.sequencer) is FORWARDED_CONFIG
 
 def test_forwards_configs_to_lower_sequencers(recording_sequencer):
     translation_layer = build_stimulus()
     translation_layer.lower_sequencers["lower"] = recording_sequencer
     translation_layer.end_of_elaboration_phase()
-    assert pyuvm.ConfigDB().get(recording_sequencer, "", "forwarded_config") is FORWARDED_CONFIG
+    assert ForwardedConfig.get(recording_sequencer) is FORWARDED_CONFIG
 
 def test_requires_a_lower_sequencer_per_channel():
     translation_layer = build_stimulus()
@@ -81,7 +86,7 @@ def test_translation_sequence_can_be_overridden():
 
 def test_forwards_configs_to_its_subscriber(recording_subscriber):
     translation_layer = build_monitoring(recording_subscriber)
-    assert pyuvm.ConfigDB().get(translation_layer.subscriber, "", "forwarded_config") is FORWARDED_CONFIG
+    assert ForwardedConfig.get(translation_layer.subscriber) is FORWARDED_CONFIG
 
 def test_publishes_translated_items(recording_subscriber):
     translation_layer = build_monitoring(recording_subscriber)

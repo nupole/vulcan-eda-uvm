@@ -1,5 +1,8 @@
+import dataclasses
+
 import pytest
 
+from vulcan_eda.uvm.configs import BaseConfig
 from vulcan_eda.uvm.configs.layers import TranslationLayerConfig
 from vulcan_eda.uvm.sequences.translation_sequence import TranslationSequence
 from vulcan_eda.uvm.subscribers.translation_subscriber import TranslationSubscriber
@@ -16,12 +19,20 @@ def test_requires_a_translation_type():
 def test_accepts_either_or_both_translation_types(translation_types):
     TranslationLayerConfig(**translation_types)
 
-def test_forwards_nothing_by_default():
-    assert TranslationLayerConfig(translation_sequence_type=TranslationSequence).forwarded_configs == {}
+@dataclasses.dataclass(frozen=True)
+class ForwardedConfig(BaseConfig):
+    value: int
 
-def test_keeps_forwarded_configs():
-    forwarded_configs = {"axi_stream_config": object()}
-    assert TranslationLayerConfig(translation_sequence_type=TranslationSequence, forwarded_configs=forwarded_configs).forwarded_configs == forwarded_configs
+def test_forwards_nothing_by_default():
+    assert TranslationLayerConfig(translation_sequence_type=TranslationSequence).forwarded_configs == ()
+
+def test_keeps_forwarded_configs_as_a_tuple():
+    forwarded_configs = [ForwardedConfig(1), ForwardedConfig(2)]
+    assert TranslationLayerConfig(translation_sequence_type=TranslationSequence, forwarded_configs=forwarded_configs).forwarded_configs == (ForwardedConfig(1), ForwardedConfig(2))
+
+def test_rejects_forwarded_configs_that_are_not_configs():
+    with pytest.raises(TypeError):
+        TranslationLayerConfig(translation_sequence_type=TranslationSequence, forwarded_configs=(object(),))
 
 def test_rejects_non_translation_sequence_type():
     with pytest.raises(TypeError):

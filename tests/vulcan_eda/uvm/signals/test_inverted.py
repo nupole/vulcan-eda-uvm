@@ -82,7 +82,7 @@ class InvertedEnv(pyuvm.uvm_env):
 
     def _create_agent(self, name, signal, is_active=pyuvm.uvm_active_passive_enum.UVM_ACTIVE):
         interface = vulcan_eda.uvm.interfaces.DataInterface(cocotb.top.clk, signal)
-        pyuvm.ConfigDB().set(self, name, "config", vulcan_eda.uvm.configs.agents.AgentConfig(interface, is_active))
+        vulcan_eda.uvm.configs.agents.AgentConfig(interface, is_active).set(self, name)
         return vulcan_eda.uvm.agents.Agent.create(name, self)
 
 @pyuvm.test()

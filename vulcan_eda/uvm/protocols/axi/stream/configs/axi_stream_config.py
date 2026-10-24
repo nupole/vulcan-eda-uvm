@@ -1,7 +1,9 @@
 import dataclasses
 
+from vulcan_eda.uvm.configs.base_config import BaseConfig
+
 @dataclasses.dataclass(frozen=True)
-class AxiStreamConfig:
+class AxiStreamConfig(BaseConfig):
     num_bytes: int
 
     @classmethod

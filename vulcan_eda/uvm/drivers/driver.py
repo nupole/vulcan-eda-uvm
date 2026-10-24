@@ -1,10 +1,11 @@
 import pyuvm
 
+from vulcan_eda.uvm.configs.agents.agent_config import AgentConfig
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
 
 class Driver(pyuvm.uvm_driver):
     def build_phase(self):
-        self._interface = pyuvm.ConfigDB().get(self, "", "interface")
+        self._interface = AgentConfig.get(self).interface
 
     async def run_phase(self):
         while True:

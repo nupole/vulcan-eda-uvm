@@ -1,7 +1,9 @@
 import dataclasses
 
+from vulcan_eda.uvm.configs.base_config import BaseConfig
+
 @dataclasses.dataclass(frozen=True)
-class AxiStreamPacketSequenceConfig:
+class AxiStreamPacketSequenceConfig(BaseConfig):
     num_packets: int = 10
     min_num_beats: int = 1
     max_num_beats: int = 16

@@ -36,11 +36,11 @@ class RecordingRandomAxiTransactionSequence(RandomAxiTransactionSequence):
 class AxiMmEnv(pyuvm.uvm_env):
     def build_phase(self):
         dut = cocotb.top
-        pyuvm.ConfigDB().set(self, "axi_environment", "config", AxiEnvironmentConfig.from_prefix(
-            dut, "", clk=dut.clk, profile=AxiConfig.Profile.LITE))
+        AxiEnvironmentConfig.from_prefix(
+            dut, "", clk=dut.clk, profile=AxiConfig.Profile.LITE).set(self, "axi_environment")
         self.axi_environment = AxiEnvironment.create("axi_environment", self)
-        pyuvm.ConfigDB().set(self, "passive_axi_environment", "config", AxiEnvironmentConfig.from_prefix(
-            dut, "", clk=dut.clk, profile=AxiConfig.Profile.LITE, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE))
+        AxiEnvironmentConfig.from_prefix(
+            dut, "", clk=dut.clk, profile=AxiConfig.Profile.LITE, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "passive_axi_environment")
         self.passive_axi_environment = AxiEnvironment.create("passive_axi_environment", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
         self.passive_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("passive_scoreboard", self)
@@ -60,10 +60,10 @@ class AxiMmTest(pyuvm.uvm_test):
         recording_random_axi_transaction_sequence = RecordingRandomAxiTransactionSequence.create("recording_random_axi_transaction_sequence")
         recording_random_axi_transaction_sequence.expected_analysis_exports = [
             scoreboard.expected_data_analysis_fifo.analysis_export for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard)]
-        pyuvm.ConfigDB().set(self.env.axi_environment.sequencer, "", "axi_transaction_sequence_config", AxiTransactionSequenceConfig(num_txn=200))
-        pyuvm.ConfigDB().set(self.env.axi_environment.sequencer, "", "axi_transaction_to_channel_sequence_config", AxiTransactionToChannelSequenceConfig(
+        AxiTransactionSequenceConfig(num_txn=200).set(self.env.axi_environment.sequencer)
+        AxiTransactionToChannelSequenceConfig(
             awvalid_generator=RandomBooleanGenerator(50), wvalid_generator=RandomBooleanGenerator(50), bready_generator=RandomBooleanGenerator(50),
-            arvalid_generator=RandomBooleanGenerator(50), rready_generator=RandomBooleanGenerator(50)))
+            arvalid_generator=RandomBooleanGenerator(50), rready_generator=RandomBooleanGenerator(50)).set(self.env.axi_environment.sequencer)
         await recording_random_axi_transaction_sequence.start(self.env.axi_environment.sequencer)
         self.drop_objection()
 

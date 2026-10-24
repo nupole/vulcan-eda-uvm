@@ -1,5 +1,4 @@
-import pyuvm
-
+from vulcan_eda.uvm.protocols.axi.stream.configs.axi_stream_config import AxiStreamConfig
 from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_packet import AxiStreamPacket
 from vulcan_eda.uvm.subscribers.translation_subscriber import TranslationSubscriber
 
@@ -8,7 +7,7 @@ class AxiStreamBeatToPacketSubscriber(TranslationSubscriber):
 
     def build_phase(self):
         super().build_phase()
-        config = pyuvm.ConfigDB().get(self, "", "axi_stream_config")
+        config = AxiStreamConfig.get(self)
         self._num_bytes = config.num_bytes
         self._beats = []
 

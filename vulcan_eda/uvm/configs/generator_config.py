@@ -1,7 +1,9 @@
 import dataclasses
 
+from vulcan_eda.uvm.configs.base_config import BaseConfig
+
 @dataclasses.dataclass(frozen=True)
-class GeneratorConfig:
+class GeneratorConfig(BaseConfig):
     def __post_init__(self):
         for field in dataclasses.fields(self):
             if field.name.endswith("_generator"):
