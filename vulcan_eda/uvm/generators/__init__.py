@@ -3,6 +3,7 @@ from vulcan_eda.uvm.generators.incrementing_generator import IncrementingGenerat
 from vulcan_eda.uvm.generators.iterable_generator import IterableGenerator
 from vulcan_eda.uvm.generators.pattern_generator import PatternGenerator
 from vulcan_eda.uvm.generators.random_bits_generator import RandomBitsGenerator
+from vulcan_eda.uvm.generators.random_boolean_generator import RandomBooleanGenerator
 from vulcan_eda.uvm.generators.random_generator import RandomGenerator
 from vulcan_eda.uvm.generators.random_integer_generator import RandomIntegerGenerator
 from vulcan_eda.uvm.generators.walking_one_hot_generator import WalkingOneHotGenerator
