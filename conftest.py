@@ -1,51 +1,11 @@
-import collections
 import pathlib
 
 import pytest
 import pyuvm
 
+from tests.support.components import RecordingSequencer, RecordingSubscriber, UpperSequencer
+
 ROOT_DIR = pathlib.Path(__file__).parent
-
-class RecordingSequencer(pyuvm.uvm_sequencer):
-    def __init__(self, name, parent):
-        super().__init__(name, parent)
-        self.items = []
-
-    async def start_item(self, item):
-        pass
-
-    async def finish_item(self, item):
-        self.items.append(item)
-
-class UpperSequencer(pyuvm.uvm_component):
-    class Drained(Exception):
-        pass
-
-    def __init__(self, name, parent):
-        super().__init__(name, parent)
-        self.items = collections.deque()
-        self.done_items = []
-        self.responses = []
-        self.seq_item_export = self
-
-    async def get_next_item(self):
-        if not self.items:
-            raise UpperSequencer.Drained()
-        self._current_item = self.items.popleft()
-        return self._current_item
-
-    def item_done(self, rsp=None):
-        self.done_items.append(self._current_item)
-        if rsp is not None:
-            self.responses.append(rsp)
-
-class RecordingSubscriber(pyuvm.uvm_subscriber):
-    def __init__(self, name, parent):
-        super().__init__(name, parent)
-        self.items = []
-
-    def write(self, item):
-        self.items.append(item)
 
 @pytest.fixture(autouse=True)
 def reset_pyuvm():
