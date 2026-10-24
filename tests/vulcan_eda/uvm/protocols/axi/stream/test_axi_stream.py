@@ -9,15 +9,11 @@ import pyuvm
 
 import vulcan_eda.uvm
 
-from vulcan_eda.uvm.configs.layers import TranslationLayerConfig
 from vulcan_eda.uvm.generators import RandomBooleanGenerator
-from vulcan_eda.uvm.interfaces import ReadyValidDataReceiverInterface, ReadyValidDataTransmitterInterface
-from vulcan_eda.uvm.layers import TranslationLayer
-from vulcan_eda.uvm.protocols.axi.stream.configs import AxiStreamConfig
+from vulcan_eda.uvm.protocols.axi.stream.configs.environments import AxiStreamEnvironmentConfig
 from vulcan_eda.uvm.protocols.axi.stream.configs.sequences import AxiStreamPacketSequenceConfig, AxiStreamPacketToBeatSequenceConfig
-from vulcan_eda.uvm.protocols.axi.stream.data import AxiStreamBeat
-from vulcan_eda.uvm.protocols.axi.stream.sequences import AxiStreamPacketToBeatSequence, RandomAxiStreamPacketSequence
-from vulcan_eda.uvm.protocols.axi.stream.subscribers import AxiStreamBeatToPacketSubscriber
+from vulcan_eda.uvm.protocols.axi.stream.environments import AxiStreamEnvironment
+from vulcan_eda.uvm.protocols.axi.stream.sequences import RandomAxiStreamPacketSequence
 from vulcan_eda.uvm.sequences import DataSequence
 
 from tests.support.components import RecordingSubscriber, create_agent
@@ -25,33 +21,28 @@ from tests.support.components import RecordingSubscriber, create_agent
 class RecordingRandomAxiStreamPacketSequence(RandomAxiStreamPacketSequence):
     def get_next_packet(self):
         packet = super().get_next_packet()
-        self.expected_analysis_export.write(packet)
+        for expected_analysis_export in self.expected_analysis_exports:
+            expected_analysis_export.write(packet)
         return packet
 
 class AxiStreamEnv(pyuvm.uvm_env):
     def build_phase(self):
         dut = cocotb.top
-        upstream_interface = ReadyValidDataTransmitterInterface(dut.clk, dut.upstream_tready, dut.upstream_tvalid, {"data": dut.upstream_tdata, "last": dut.upstream_tlast}, AxiStreamBeat)
-        self.upstream_agent = create_agent(self, "upstream_agent", upstream_interface)
-        TranslationLayerConfig(
-            translation_sequence_type=AxiStreamPacketToBeatSequence,
-            forwarded_configs=(AxiStreamConfig.from_tdata(dut.upstream_tdata),)).set(self, "upstream_layer")
-        self.upstream_layer = TranslationLayer.create("upstream_layer", self)
-        downstream_interface = ReadyValidDataReceiverInterface(dut.clk, dut.downstream_tready, dut.downstream_tvalid, {"data": dut.downstream_tdata, "last": dut.downstream_tlast}, AxiStreamBeat)
-        self.downstream_agent = create_agent(self, "downstream_agent", downstream_interface)
-        TranslationLayerConfig(
-            translation_subscriber_type=AxiStreamBeatToPacketSubscriber,
-            forwarded_configs=(AxiStreamConfig.from_tdata(dut.downstream_tdata),)).set(self, "downstream_layer")
-        self.downstream_layer = TranslationLayer.create("downstream_layer", self)
+        AxiStreamEnvironmentConfig.from_prefix(dut, "upstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.TRANSMITTER).set(self, "upstream_environment")
+        self.upstream_environment = AxiStreamEnvironment.create("upstream_environment", self)
+        AxiStreamEnvironmentConfig.from_prefix(dut, "downstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.RECEIVER).set(self, "downstream_environment")
+        self.downstream_environment = AxiStreamEnvironment.create("downstream_environment", self)
+        AxiStreamEnvironmentConfig.from_prefix(dut, "downstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.RECEIVER, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "passive_environment")
+        self.passive_environment = AxiStreamEnvironment.create("passive_environment", self)
         transfer_interface = vulcan_eda.uvm.interfaces.DataInterface(dut.clk, vulcan_eda.uvm.signals.Bundle(dut.downstream_tready, dut.downstream_tvalid, dut.downstream_tlast))
         self.transfer_agent = create_agent(self, "transfer_agent", transfer_interface, pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.transfer_recorder = RecordingSubscriber.create("transfer_recorder", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
+        self.passive_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("passive_scoreboard", self)
 
     def connect_phase(self):
-        self.upstream_layer.lower_sequencers["stream"] = self.upstream_agent.sequencer
-        self.downstream_agent.analysis_port.connect(self.downstream_layer.analysis_exports["stream"])
-        self.downstream_layer.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
+        self.downstream_environment.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
+        self.passive_environment.analysis_port.connect(self.passive_scoreboard.actual_data_analysis_fifo.analysis_export)
         self.transfer_agent.analysis_port.connect(self.transfer_recorder.analysis_export)
 
 @pyuvm.test()
@@ -64,12 +55,13 @@ class AxiStreamTest(pyuvm.uvm_test):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         ready_sequence = DataSequence.create("ready_sequence")
         ready_sequence.data_generator = RandomBooleanGenerator(50)
-        cocotb.start_soon(ready_sequence.start(self.env.downstream_agent.sequencer))
-        AxiStreamPacketToBeatSequenceConfig(RandomBooleanGenerator(50)).set(self.env.upstream_layer.sequencer)
-        AxiStreamPacketSequenceConfig(num_packets=100).set(self.env.upstream_layer.sequencer)
+        cocotb.start_soon(ready_sequence.start(self.env.downstream_environment.sequencer))
+        AxiStreamPacketToBeatSequenceConfig(RandomBooleanGenerator(50)).set(self.env.upstream_environment.sequencer)
+        AxiStreamPacketSequenceConfig(num_packets=100).set(self.env.upstream_environment.sequencer)
         recording_random_axi_stream_packet_sequence = RecordingRandomAxiStreamPacketSequence.create("recording_random_axi_stream_packet_sequence")
-        recording_random_axi_stream_packet_sequence.expected_analysis_export = self.env.scoreboard.expected_data_analysis_fifo.analysis_export
-        await recording_random_axi_stream_packet_sequence.start(self.env.upstream_layer.sequencer)
+        recording_random_axi_stream_packet_sequence.expected_analysis_exports = [
+            scoreboard.expected_data_analysis_fifo.analysis_export for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard)]
+        await recording_random_axi_stream_packet_sequence.start(self.env.upstream_environment.sequencer)
         await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
         transfers = [(ready == 1 and valid == 1, last == 1) for ready, valid, last in self.env.transfer_recorder.items]
         assert any(last_transfer and last and next_transfer for (last_transfer, last), (next_transfer, _) in zip(transfers, transfers[1:]))
