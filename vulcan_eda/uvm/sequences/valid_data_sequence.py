@@ -1,18 +1,8 @@
-import random
-
 import pyuvm
 
-from vulcan_eda.uvm.configs.sequences.random_data_sequence_config import RandomDataSequenceConfig
 from vulcan_eda.uvm.generators.constant_generator import ConstantGenerator
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
-from vulcan_eda.uvm.sequences.transaction_sequence import TransactionSequence
-
-class ValidDataSequenceItem(pyuvm.uvm_sequence_item):
-    def __init__(self, name, valid, data):
-        super().__init__(name)
-        self.valid = valid
-        self.data = data
 
 class ValidDataSequence(pyuvm.uvm_sequence):
     _valid_generator = ConstantGenerator(True)
@@ -54,29 +44,3 @@ class ValidDataSequence(pyuvm.uvm_sequence):
     async def _send(self, sequence_item):
         await self.start_item(sequence_item)
         await self.finish_item(sequence_item)
-
-class RandomValidDataSequence(TransactionSequence):
-    def _configure(self):
-        super()._configure()
-        config = pyuvm.ConfigDB().get(self.sequencer, "", "random_data_sequence_config", RandomDataSequenceConfig())
-        self.min_data = config.min_data
-        self.max_data = config.max_data
-
-    def _get_next_sequence_item(self, is_txn):
-        data = random.randint(self.min_data, self.max_data)
-        return ValidDataSequenceItem('random_valid_data_sequence_item', is_txn, data)
-
-class IterableValidDataSequence(TransactionSequence):
-    iterable = ()
-
-    def _configure(self):
-        super()._configure()
-        data = list(self.iterable)
-        if not data:
-            raise ValueError("iterable must not be empty")
-        self.max_num_txn = len(data)
-        self._iterator = iter(data)
-
-    def _get_next_sequence_item(self, is_txn):
-        data = next(self._iterator) if is_txn else None
-        return ValidDataSequenceItem('iterable_valid_data_sequence_item', is_txn, data)

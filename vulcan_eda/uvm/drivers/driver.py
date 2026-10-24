@@ -12,7 +12,7 @@ class Driver(pyuvm.uvm_driver):
             valid_item, sequence_item = self.seq_item_port.try_next_item()
             if valid_item:
                 await sequence_item.item_ready.wait()
-                if isinstance(sequence_item, IdleSequenceItem) or not getattr(sequence_item, "valid", True):
+                if isinstance(sequence_item, IdleSequenceItem):
                     await self._interface.drive_idle()
                 else:
                     await self._interface.drive_data(sequence_item.data)

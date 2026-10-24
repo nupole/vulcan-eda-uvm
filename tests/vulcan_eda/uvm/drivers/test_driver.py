@@ -5,7 +5,6 @@ import pytest
 from vulcan_eda.uvm.drivers.driver import Driver
 from vulcan_eda.uvm.sequences.data_sequence import DataSequenceItem
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
-from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequenceItem
 
 class Stop(Exception):
     pass
@@ -61,6 +60,3 @@ def test_drives_items_on_consecutive_edges_then_idles():
 
 def test_idles_for_an_idle_item():
     assert run([DataSequenceItem("item", 1), IdleSequenceItem("idle"), DataSequenceItem("item", 2)], 3) == ([1, "idle", 2], 3)
-
-def test_idles_for_an_invalid_valid_data_item():
-    assert run([ValidDataSequenceItem("item", False, None)], 1) == (["idle"], 1)
