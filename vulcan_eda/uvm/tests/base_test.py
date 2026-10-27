@@ -48,6 +48,11 @@ class BaseTest(pyuvm.uvm_test):
             self.set_report_verbosity(pyuvm.UVM_MEDIUM)
         return report_server
 
+    def end_of_elaboration_phase(self):
+        self.uvm_report.info("TOPOLOGY", "\n".join(["topology:", *BaseTest._topology(self, 0)]), pyuvm.UVM_FULL)
+        overrides = list(BaseTest._factory_overrides())
+        self.uvm_report.info("FACTORY", "\n".join(["factory overrides:", *overrides]) if overrides else "factory overrides: none", pyuvm.UVM_FULL)
+
     async def run_phase(self):
         self.raise_objection()
         if self.timeout_us is None:
@@ -78,6 +83,22 @@ class BaseTest(pyuvm.uvm_test):
         report_server.log_final_status(self.logger, prior_failure_msg=failure)
         if failure is not None:
             raise AssertionError(failure)
+
+    @staticmethod
+    def _topology(component, depth):
+        yield f"{'  ' * depth}{component.get_name()} ({type(component).__name__})"
+        for child in component.get_children():
+            if not isinstance(child, pyuvm.uvm_export_base):
+                yield from BaseTest._topology(child, depth + 1)
+
+    @staticmethod
+    def _factory_overrides():
+        for original, override in pyuvm.uvm_factory().fd.overrides.items():
+            original_name = getattr(original, "__name__", original)
+            if override.type_override is not None:
+                yield f"{original_name} => {override.type_override.__name__}"
+            for path, inst_override in override.inst_overrides.items():
+                yield f"{original_name} at {path} => {inst_override.__name__}"
 
     def _failure_reason(self, failure):
         lines = [failure]

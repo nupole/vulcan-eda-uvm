@@ -70,6 +70,37 @@ def test_counts_errors_per_component_and_report_id(base_test):
         test.final_phase()
     assert str(failure.value).splitlines()[1:3] == ["2 ERROR from uvm_test_top.component", "1 OTHER from uvm_test_top.other"]
 
+class Child(pyuvm.uvm_component):
+    pass
+
+class OverridingChild(Child):
+    pass
+
+def elaborate(test):
+    test.set_report_verbosity(pyuvm.UVM_FULL)
+    child = Child("child", test)
+    pyuvm.uvm_analysis_port("analysis_port", child)
+    pyuvm.uvm_component("grandchild", child)
+    test.end_of_elaboration_phase()
+
+def test_reports_the_topology_without_ports_at_full_verbosity(base_test, caplog):
+    elaborate(base_test())
+    assert "topology:\nuvm_test_top (BaseTest)\n  child (Child)\n    grandchild (uvm_component)" in messages(caplog)
+
+def test_reports_factory_overrides_at_full_verbosity(base_test, caplog):
+    pyuvm.uvm_factory().set_type_override_by_type(Child, OverridingChild)
+    pyuvm.uvm_factory().set_inst_override_by_type(Child, OverridingChild, "uvm_test_top.env.*")
+    elaborate(base_test())
+    assert "factory overrides:\nChild => OverridingChild\nChild at uvm_test_top.env.* => OverridingChild" in messages(caplog)
+
+def test_reports_no_factory_overrides(base_test, caplog):
+    elaborate(base_test())
+    assert "factory overrides: none" in messages(caplog)
+
+def test_reports_elaboration_only_at_full_verbosity(base_test, caplog):
+    base_test().end_of_elaboration_phase()
+    assert messages(caplog) == []
+
 def test_stimulus_must_be_overridden(base_test):
     with pytest.raises(NotImplementedError):
         asyncio.run(base_test().stimulus())
