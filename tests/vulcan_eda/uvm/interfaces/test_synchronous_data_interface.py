@@ -12,29 +12,15 @@ import vulcan_eda.uvm
 from tests.support.components import RecordingSubscriber, create_agent
 from tests.support.signals import Handle
 
-def test_reads_and_drives_a_raw_pin():
+def test_runs_the_clocked_loop_and_drives_its_data():
+    synchronous_data_interface_type = vulcan_eda.uvm.interfaces.SynchronousDataInterface
+    assert (synchronous_data_interface_type.run, synchronous_data_interface_type.drive_data) == (vulcan_eda.uvm.interfaces.SynchronousInterface.run, vulcan_eda.uvm.interfaces.base_data_interface.BaseDataInterface.drive_data)
+
+def test_wraps_its_clock_and_data():
     handle = Handle(8)
-    synchronous_data_interface = vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, handle)
+    synchronous_data_interface = vulcan_eda.uvm.interfaces.SynchronousDataInterface("clk", handle)
     synchronous_data_interface.write_data(3)
-    assert (handle.value, synchronous_data_interface.read_data()) == (3, 3)
-
-def test_idle_holds_the_pin_by_default():
-    handle = Handle(8)
-    synchronous_data_interface = vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, handle)
-    synchronous_data_interface.write_data(3)
-    synchronous_data_interface.write_idle()
-    assert handle.value == 3
-
-def test_idle_drives_its_idle_generator():
-    handle = Handle(8)
-    synchronous_data_interface = vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, handle, vulcan_eda.uvm.generators.IterableGenerator((4, 5)))
-    synchronous_data_interface.write_idle()
-    first = handle.value
-    synchronous_data_interface.write_idle()
-    assert (first, handle.value) == (4, 5)
-
-def test_keeps_signal_adapters():
-    assert vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, vulcan_eda.uvm.signals.Constant(1)).read_data() == 1
+    assert (synchronous_data_interface._clk, handle.value) == ("clk", 3)
 
 class DataInterfaceEnv(pyuvm.uvm_env):
     def build_phase(self):
