@@ -1,3 +1,4 @@
+from vulcan_eda.uvm.interfaces.asynchronous_data_interface import AsynchronousDataInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_interface import ReadyValidDataInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_receiver_interface import ReadyValidDataReceiverInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_transmitter_interface import ReadyValidDataTransmitterInterface
