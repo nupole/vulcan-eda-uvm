@@ -11,8 +11,8 @@ FIELDS = [field.name for field in dataclasses.fields(AxiTransactionToChannelSequ
 def test_is_a_generator_config():
     assert isinstance(AxiTransactionToChannelSequenceConfig(), GeneratorConfig)
 
-def test_has_a_generator_for_each_handshake_the_manager_drives():
-    assert FIELDS == ["awvalid_generator", "wvalid_generator", "bready_generator", "arvalid_generator", "rready_generator"]
+def test_has_a_valid_generator_for_each_channel_the_manager_sends_on():
+    assert FIELDS == ["awvalid_generator", "wvalid_generator", "arvalid_generator"]
 
 @pytest.mark.parametrize("field", FIELDS)
 def test_defaults_to_always_asserted(field):

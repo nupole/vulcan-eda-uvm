@@ -3,6 +3,7 @@ import types
 import pytest
 import pyuvm
 
+from vulcan_eda.uvm.generators import ConstantGenerator, PatternGenerator
 from vulcan_eda.uvm.protocols.axi.mm.configs import AxiConfig
 from vulcan_eda.uvm.protocols.axi.mm.configs.environments import AxiEnvironmentConfig
 
@@ -44,3 +45,18 @@ def test_explicit_pins_require_lite_pins():
     pins = {pin: f"{pin} handle" for pin in LITE_PINS if pin != "rready"}
     with pytest.raises(TypeError):
         AxiEnvironmentConfig(clk="clk", profile=AxiConfig.Profile.LITE, **pins)
+
+@pytest.mark.parametrize("field", ["bready_generator", "rready_generator"])
+def test_is_always_ready_by_default(field):
+    config = AxiEnvironmentConfig.from_prefix(dut("", LITE_PINS), "", clk="clk", profile=AxiConfig.Profile.LITE)
+    assert getattr(config, field) == ConstantGenerator(True)
+
+@pytest.mark.parametrize("field", ["bready_generator", "rready_generator"])
+def test_from_prefix_takes_a_ready_generator_instead_of_a_pin(field):
+    config = AxiEnvironmentConfig.from_prefix(dut("", LITE_PINS + (field,)), "", clk="clk", profile=AxiConfig.Profile.LITE, **{field: PatternGenerator((0, 1))})
+    assert getattr(config, field) == PatternGenerator((0, 1))
+
+@pytest.mark.parametrize("field", ["bready_generator", "rready_generator"])
+def test_rejects_a_one_shot_ready_generator(field):
+    with pytest.raises(TypeError, match=f"{field} must be re-iterable"):
+        AxiEnvironmentConfig.from_prefix(dut("", LITE_PINS), "", clk="clk", profile=AxiConfig.Profile.LITE, **{field: iter((0, 1))})

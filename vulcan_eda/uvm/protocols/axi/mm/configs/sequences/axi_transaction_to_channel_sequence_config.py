@@ -8,6 +8,4 @@ from vulcan_eda.uvm.generators.constant_generator import ConstantGenerator
 class AxiTransactionToChannelSequenceConfig(GeneratorConfig):
     awvalid_generator: typing.Iterable = ConstantGenerator(True)
     wvalid_generator: typing.Iterable = ConstantGenerator(True)
-    bready_generator: typing.Iterable = ConstantGenerator(True)
     arvalid_generator: typing.Iterable = ConstantGenerator(True)
-    rready_generator: typing.Iterable = ConstantGenerator(True)

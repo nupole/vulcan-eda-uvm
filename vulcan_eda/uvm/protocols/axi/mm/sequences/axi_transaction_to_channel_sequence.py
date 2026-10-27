@@ -5,17 +5,12 @@ from vulcan_eda.uvm.protocols.axi.mm.configs.sequences.axi_transaction_to_channe
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_address import AxiAddress
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_transaction import AxiTransaction
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_write_data import AxiWriteData
-from vulcan_eda.uvm.sequences.data_sequence import DataSequence
 from vulcan_eda.uvm.sequences.translation_sequence import TranslationSequence
 from vulcan_eda.uvm.sequences.valid_data_sequence import ValidDataSequence
 
 class AxiTransactionToChannelSequence(TranslationSequence):
-    channels = ("aw", "w", "b", "ar", "r")
+    channels = ("aw", "w", "ar")
     uses_responses = True
-
-    async def body(self):
-        self._ready_started = False
-        await super().body()
 
     async def translate(self, upper_item):
         self._config = AxiConfig.get(self.upper_sequencer)
@@ -23,10 +18,6 @@ class AxiTransactionToChannelSequence(TranslationSequence):
         if self._config.profile is AxiConfig.Profile.LITE and not (txn.num_beats == 1):
             raise ValueError("AXI4-Lite transactions must be a single beat")
         self._sequence_config = AxiTransactionToChannelSequenceConfig.get(self.upper_sequencer)
-        if not self._ready_started:
-            self._start_ready("b", self._sequence_config.bready_generator)
-            self._start_ready("r", self._sequence_config.rready_generator)
-            self._ready_started = True
         address = AxiAddress(address=txn.address, bytes_per_beat=self._config.bytes_per_beat, num_beats=txn.num_beats, id=txn.id, burst=txn.burst)
         if txn.access is AxiTransaction.Access.WRITE:
             strobe = 2 ** self._config.bytes_per_beat - 1
@@ -37,11 +28,6 @@ class AxiTransactionToChannelSequence(TranslationSequence):
         else:
             await self._send("ar", (address,), self._sequence_config.arvalid_generator)
         return await self.responses.get()
-
-    def _start_ready(self, channel, ready_generator):
-        data_sequence = DataSequence.create(f"{channel}_ready_sequence")
-        data_sequence.data_generator = ready_generator
-        cocotb.start_soon(data_sequence.start(self.lower_sequencers[channel]))
 
     async def _send(self, channel, data_generator, valid_generator):
         valid_data_sequence = ValidDataSequence.create(f"{channel}_sequence")

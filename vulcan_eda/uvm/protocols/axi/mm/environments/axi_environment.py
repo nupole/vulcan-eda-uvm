@@ -40,8 +40,8 @@ class AxiEnvironment(pyuvm.uvm_env):
             agent.analysis_port.connect(self._layer.analysis_exports[channel])
         self._layer.analysis_port.connect(self.analysis_port)
         if self._config.is_active is pyuvm.uvm_active_passive_enum.UVM_ACTIVE:
-            for channel, agent in self._agents.items():
-                self._layer.lower_sequencers[channel] = agent.sequencer
+            for channel in AxiTransactionToChannelSequence.channels:
+                self._layer.lower_sequencers[channel] = self._agents[channel].sequencer
             self.sequencer = self._layer.sequencer
 
     def _interfaces(self, axi_config):
@@ -54,12 +54,12 @@ class AxiEnvironment(pyuvm.uvm_env):
             "w": ReadyValidDataTransmitterInterface(config.clk, config.wready, config.wvalid, self._pins(
                 data=config.wdata, strobe=config.wstrb, last=config.wlast), AxiWriteData),
             "b": ReadyValidDataReceiverInterface(config.clk, config.bready, config.bvalid, self._pins(
-                response=config.bresp, id=config.bid), AxiWriteResponse),
+                response=config.bresp, id=config.bid), AxiWriteResponse, idle_generator=config.bready_generator),
             "ar": ReadyValidDataTransmitterInterface(config.clk, config.arready, config.arvalid, self._pins(
                 address=config.araddr, prot=config.arprot, bytes_per_beat=size if config.arsize is None else config.arsize,
                 id=config.arid, num_beats=config.arlen, burst=config.arburst), AxiAddress),
             "r": ReadyValidDataReceiverInterface(config.clk, config.rready, config.rvalid, self._pins(
-                data=config.rdata, response=config.rresp, id=config.rid, last=config.rlast), AxiReadData)}
+                data=config.rdata, response=config.rresp, id=config.rid, last=config.rlast), AxiReadData, idle_generator=config.rready_generator)}
 
     def _pins(self, **pins):
         return {name: pin for name, pin in pins.items() if pin is not None}
