@@ -77,16 +77,16 @@ class InvertedEnv(pyuvm.uvm_env):
 
 @pyuvm.test()
 class InvertedTest(vulcan_eda.uvm.tests.BaseTest):
+    timeout_us = 100
+
     def build_phase(self):
         self.env = InvertedEnv("env", self)
 
-    async def run_phase(self):
-        self.raise_objection()
+    async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         data_sequence = vulcan_eda.uvm.sequences.DataSequence.create("data_sequence")
         data_sequence.data_generator = [(bit, bit, bus, bus) for bit in range(2) for bus in range(16)]
         await data_sequence.start(self.env.stimulus_agent.sequencer)
-        self.drop_objection()
 
 def test_inverted(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

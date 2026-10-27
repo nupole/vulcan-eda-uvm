@@ -2,7 +2,6 @@ import pathlib
 
 import cocotb
 import cocotb.clock
-import cocotb.triggers
 import cocotb_tools.runner
 
 import pyuvm
@@ -47,11 +46,13 @@ class AxiStreamEnv(pyuvm.uvm_env):
 
 @pyuvm.test()
 class AxiStreamTest(vulcan_eda.uvm.tests.BaseTest):
+    drain_time_ns = 20
+    timeout_us = 100
+
     def build_phase(self):
         self.env = AxiStreamEnv("env", self)
 
-    async def run_phase(self):
-        self.raise_objection()
+    async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         ready_sequence = DataSequence.create("ready_sequence")
         ready_sequence.data_generator = RandomBooleanGenerator(50)
@@ -62,10 +63,11 @@ class AxiStreamTest(vulcan_eda.uvm.tests.BaseTest):
         recording_random_axi_stream_packet_sequence.expected_analysis_exports = [
             scoreboard.expected_data_analysis_fifo.analysis_export for scoreboard in (self.env.scoreboard, self.env.passive_scoreboard)]
         await recording_random_axi_stream_packet_sequence.start(self.env.upstream_environment.sequencer)
-        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
+
+    def check_phase(self):
         transfers = [(ready == 1 and valid == 1, last == 1) for ready, valid, last in self.env.transfer_recorder.items]
-        assert any(last_transfer and last and next_transfer for (last_transfer, last), (next_transfer, _) in zip(transfers, transfers[1:]))
-        self.drop_objection()
+        if not any(last_transfer and last and next_transfer for (last_transfer, last), (next_transfer, _) in zip(transfers, transfers[1:])):
+            self.uvm_report.error("BACK_TO_BACK", "no packet started right after the previous one ended")
 
 def test_axi_stream(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

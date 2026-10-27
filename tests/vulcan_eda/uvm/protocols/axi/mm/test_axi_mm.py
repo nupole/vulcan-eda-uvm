@@ -51,11 +51,12 @@ class AxiMmEnv(pyuvm.uvm_env):
 
 @pyuvm.test()
 class AxiMmTest(vulcan_eda.uvm.tests.BaseTest):
+    timeout_us = 100
+
     def build_phase(self):
         self.env = AxiMmEnv("env", self)
 
-    async def run_phase(self):
-        self.raise_objection()
+    async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         recording_random_axi_transaction_sequence = RecordingRandomAxiTransactionSequence.create("recording_random_axi_transaction_sequence")
         recording_random_axi_transaction_sequence.expected_analysis_exports = [
@@ -65,7 +66,6 @@ class AxiMmTest(vulcan_eda.uvm.tests.BaseTest):
             awvalid_generator=RandomBooleanGenerator(50), wvalid_generator=RandomBooleanGenerator(50), bready_generator=RandomBooleanGenerator(50),
             arvalid_generator=RandomBooleanGenerator(50), rready_generator=RandomBooleanGenerator(50)).set(self.env.axi_environment.sequencer)
         await recording_random_axi_transaction_sequence.start(self.env.axi_environment.sequencer)
-        self.drop_objection()
 
 def test_axi_mm(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

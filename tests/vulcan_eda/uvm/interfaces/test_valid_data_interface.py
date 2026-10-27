@@ -3,7 +3,6 @@ import pathlib
 
 import cocotb
 import cocotb.clock
-import cocotb.triggers
 import cocotb_tools.runner
 
 import pyuvm
@@ -45,11 +44,13 @@ class ValidDataInterfaceEnv(pyuvm.uvm_env):
 
 @pyuvm.test()
 class ValidDataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
+    drain_time_ns = 20
+    timeout_us = 100
+
     def build_phase(self):
         self.env = ValidDataInterfaceEnv("env", self)
 
-    async def run_phase(self):
-        self.raise_objection()
+    async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         valid_data_sequence = vulcan_eda.uvm.sequences.ValidDataSequence.create("valid_data_sequence")
         valid_data_sequence.valid_generator = vulcan_eda.uvm.generators.RandomBooleanGenerator(50)
@@ -58,8 +59,6 @@ class ValidDataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
             self.env.scoreboard.expected_data_analysis_fifo.analysis_export.write(value)
         valid_data_sequence.data_generator = data
         await valid_data_sequence.start(self.env.upstream_agent.sequencer)
-        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
-        self.drop_objection()
 
 def test_valid_data_interface(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

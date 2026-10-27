@@ -4,7 +4,6 @@ import random
 
 import cocotb
 import cocotb.clock
-import cocotb.triggers
 import cocotb_tools.runner
 
 import pytest
@@ -114,27 +113,31 @@ class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
 
 @pyuvm.test()
 class ReadyValidDataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
+    drain_time_ns = 20
+    timeout_us = 100
+
     def build_phase(self):
         self.env = ReadyValidDataInterfaceEnv("env", self)
 
-    async def run_phase(self):
-        self.raise_objection()
+    async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         ready_sequence = vulcan_eda.uvm.sequences.DataSequence.create("ready_sequence")
         ready_sequence.data_generator = vulcan_eda.uvm.generators.RandomBooleanGenerator(50)
         cocotb.start_soon(ready_sequence.start(self.env.downstream_agent.sequencer))
-        data = [random.getrandbits(8) for _ in range(200)]
-        for value in data:
+        self.data = [random.getrandbits(8) for _ in range(200)]
+        for value in self.data:
             self.env.scoreboard.expected_data_analysis_fifo.analysis_export.write(value)
-        for chunk in range(0, len(data), 50):
+        for chunk in range(0, len(self.data), 50):
             valid_data_sequence = vulcan_eda.uvm.sequences.ValidDataSequence.create("valid_data_sequence")
-            valid_data_sequence.data_generator = data[chunk:chunk + 50]
+            valid_data_sequence.data_generator = self.data[chunk:chunk + 50]
             await valid_data_sequence.start(self.env.upstream_agent.sequencer)
-        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
+
+    def check_phase(self):
         handshakes = [ready == 1 and valid == 1 for ready, valid in self.env.handshake_recorder.items]
-        assert sum(handshakes) == len(data)
-        assert any(first and second for first, second in zip(handshakes, handshakes[1:]))
-        self.drop_objection()
+        if sum(handshakes) != len(self.data):
+            self.uvm_report.error("HANDSHAKES", f"{sum(handshakes)} handshakes for {len(self.data)} data")
+        if not any(first and second for first, second in zip(handshakes, handshakes[1:])):
+            self.uvm_report.error("BACK_TO_BACK", "no two handshakes were back to back")
 
 def test_ready_valid_data_interface(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

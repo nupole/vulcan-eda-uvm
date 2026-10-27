@@ -3,7 +3,6 @@ import pathlib
 
 import cocotb
 import cocotb.clock
-import cocotb.triggers
 import cocotb_tools.runner
 
 import pyuvm
@@ -48,20 +47,23 @@ class DataInterfaceEnv(pyuvm.uvm_env):
 
 @pyuvm.test()
 class DataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
+    drain_time_ns = 20
+    timeout_us = 100
+
     def build_phase(self):
         self.env = DataInterfaceEnv("env", self)
 
-    async def run_phase(self):
-        self.raise_objection()
+    async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
         data_sequence = vulcan_eda.uvm.sequences.DataSequence.create("data_sequence")
-        data = list(itertools.islice(vulcan_eda.uvm.generators.RandomBitsGenerator(8), 100))
-        data_sequence.data_generator = data
+        self.data = list(itertools.islice(vulcan_eda.uvm.generators.RandomBitsGenerator(8), 100))
+        data_sequence.data_generator = self.data
         await data_sequence.start(self.env.upstream_agent.sequencer)
-        await cocotb.triggers.ClockCycles(cocotb.top.clk, 2)
+
+    def check_phase(self):
         recorded = self.env.data_recorder.items
-        assert any(recorded[start:start + len(data)] == data for start in range(len(recorded)))
-        self.drop_objection()
+        if not any(recorded[start:start + len(self.data)] == self.data for start in range(len(recorded))):
+            self.uvm_report.error("NOT_RECORDED", "the driven data never appeared contiguously on the outputs")
 
 def test_data_interface(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')
