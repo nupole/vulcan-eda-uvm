@@ -1,3 +1,9 @@
+import asyncio
+import pathlib
+
+import cocotb.simtime
+import cocotb.triggers
+import cocotb_tools.runner
 import pytest
 import pyuvm
 
@@ -63,3 +69,39 @@ def test_counts_errors_per_component_and_report_id(base_test):
     with pytest.raises(AssertionError) as failure:
         test.final_phase()
     assert str(failure.value).splitlines()[1:3] == ["2 ERROR from uvm_test_top.component", "1 OTHER from uvm_test_top.other"]
+
+def test_stimulus_must_be_overridden(base_test):
+    with pytest.raises(NotImplementedError):
+        asyncio.run(base_test().stimulus())
+
+@pyuvm.test()
+class DrainTimeTest(BaseTest):
+    drain_time_ns = 30
+
+    async def stimulus(self):
+        await cocotb.triggers.Timer(10, unit="ns")
+
+    def check_phase(self):
+        end_time = cocotb.simtime.get_sim_time("ns")
+        if end_time != 40:
+            self.uvm_report.error("DRAIN", f"run_phase ended at {end_time}ns instead of 40ns")
+
+def test_base_test_bench(build_dir):
+    runner = cocotb_tools.runner.get_runner('ghdl')
+    current_dir = pathlib.Path(__file__).parent
+
+    runner.build(
+        hdl_toplevel = "test_base_test",
+        sources = [current_dir / "test_base_test.vhdl"],
+        build_dir = build_dir,
+        build_args = ["--std=08"]
+    )
+
+    runner.test(
+        test_module = "test_base_test",
+        hdl_toplevel = "test_base_test",
+        hdl_toplevel_lang = "vhdl",
+        build_dir = build_dir,
+        test_dir = build_dir,
+        test_args = ["--std=08"]
+    )

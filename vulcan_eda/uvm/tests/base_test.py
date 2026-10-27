@@ -3,6 +3,7 @@ import logging
 
 import cocotb
 import cocotb.simtime
+import cocotb.triggers
 import pyuvm
 import pyuvm.uvm_reporting.uvm_runtime_options
 
@@ -25,6 +26,8 @@ class BaseTest(pyuvm.uvm_test):
                     sim_time = ""
                 self.first_error = f"first{sim_time} from {source}: {record.getMessage()}"
 
+    drain_time_ns = 0
+
     # cocotb holds the regression seed only while test modules are collected, which is when this module is imported
     _REGRESSION_SEED = getattr(cocotb, "RANDOM_SEED", None)
     _QUIT_COUNT_OPTIONS = ("max_quit_count", "MAX_QUIT_COUNT", "UVM_MAX_QUIT_COUNT")
@@ -43,6 +46,16 @@ class BaseTest(pyuvm.uvm_test):
         if pyuvm.uvm_reporting.uvm_runtime_options.get_runtime_option(self._VERBOSITY_OPTION) is None:
             self.set_report_verbosity(pyuvm.UVM_MEDIUM)
         return report_server
+
+    async def run_phase(self):
+        self.raise_objection()
+        await self.stimulus()
+        if self.drain_time_ns:
+            await cocotb.triggers.Timer(self.drain_time_ns, unit="ns")
+        self.drop_objection()
+
+    async def stimulus(self):
+        raise NotImplementedError
 
     def final_phase(self):
         logging.getLogger("uvm").removeHandler(self._error_recorder)
