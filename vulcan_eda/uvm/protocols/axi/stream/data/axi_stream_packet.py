@@ -1,10 +1,11 @@
 import dataclasses
 
+from vulcan_eda.uvm.data.formatted_data import FormattedData
 from vulcan_eda.uvm.protocols.axi.stream.data.axi_stream_beat import AxiStreamBeat
 
 @dataclasses.dataclass(frozen=True)
-class AxiStreamPacket:
-    data: bytes
+class AxiStreamPacket(FormattedData):
+    data: bytes = dataclasses.field(metadata={"format": "#x"})
 
     def to_beats(self, num_bytes):
         if len(self.data) == 0 or len(self.data) % num_bytes != 0:

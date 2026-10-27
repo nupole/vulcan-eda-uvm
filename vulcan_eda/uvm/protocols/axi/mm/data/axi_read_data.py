@@ -1,12 +1,13 @@
 import dataclasses
 
+from vulcan_eda.uvm.data.formatted_data import FormattedData
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_response import AxiResponse
 from vulcan_eda.uvm.signals.bundle import Bundle
 from vulcan_eda.uvm.signals.constant import Constant
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class AxiReadData:
-    data: int
+class AxiReadData(FormattedData):
+    data: int = dataclasses.field(metadata={"format": "#x"})
     response: AxiResponse
     last: bool = True
     id: int = 0

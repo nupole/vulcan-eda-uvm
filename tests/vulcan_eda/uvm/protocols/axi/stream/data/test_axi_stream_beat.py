@@ -23,3 +23,6 @@ def test_signals_follow_value_order():
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         AxiStreamBeat(0x12, True)
+
+def test_prints_data_in_hex():
+    assert str(AxiStreamBeat(data=0xff, last=True)) == "AxiStreamBeat(data=0xff, last=True)"

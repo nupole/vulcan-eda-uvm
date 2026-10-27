@@ -29,3 +29,7 @@ def test_rejects_read_with_wrong_number_of_words():
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         AxiTransaction(AxiTransaction.Access.READ, 0x10)
+
+def test_prints_address_and_each_data_word_in_hex():
+    transaction = AxiTransaction(access=AxiTransaction.Access.WRITE, address=0x8, data=(0xa, 0xb), num_beats=2)
+    assert str(transaction) == "AxiTransaction(access=WRITE, address=0x8, data=(0xa, 0xb), num_beats=2, id=0, burst=INCR, response=None)"

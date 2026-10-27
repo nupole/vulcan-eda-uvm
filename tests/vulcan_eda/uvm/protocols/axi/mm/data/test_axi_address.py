@@ -49,3 +49,6 @@ def test_signals_reject_a_burst_on_lite_defaults():
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         AxiAddress(0x10, 4)
+
+def test_prints_the_address_in_hex():
+    assert str(AxiAddress(address=0x10, bytes_per_beat=4)) == "AxiAddress(address=0x10, bytes_per_beat=4, num_beats=1, id=0, burst=INCR, prot=0)"

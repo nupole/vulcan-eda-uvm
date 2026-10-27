@@ -36,3 +36,6 @@ def test_signals_reject_a_non_last_beat_on_lite_defaults():
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         AxiWriteData(0xAB, 0xF)
+
+def test_prints_data_and_strobe_in_hex():
+    assert str(AxiWriteData(data=0xdeadbeef, strobe=0xf)) == "AxiWriteData(data=0xdeadbeef, strobe=0xf, last=True)"

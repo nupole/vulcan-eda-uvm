@@ -41,3 +41,6 @@ def test_signals_reject_a_non_last_beat_on_lite_defaults():
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         AxiReadData(0x12, AxiResponse.OKAY)
+
+def test_prints_data_in_hex_and_the_response_by_name():
+    assert str(AxiReadData(data=0xdeadbeef, response=AxiResponse.OKAY)) == "AxiReadData(data=0xdeadbeef, response=OKAY, last=True, id=0)"

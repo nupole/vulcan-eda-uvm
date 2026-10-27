@@ -1,12 +1,13 @@
 import dataclasses
 
+from vulcan_eda.uvm.data.formatted_data import FormattedData
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_burst import AxiBurst
 from vulcan_eda.uvm.signals.bundle import Bundle
 from vulcan_eda.uvm.signals.constant import Constant
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class AxiAddress:
-    address: int
+class AxiAddress(FormattedData):
+    address: int = dataclasses.field(metadata={"format": "#x"})
     bytes_per_beat: int
     num_beats: int = 1
     id: int = 0

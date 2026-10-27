@@ -35,3 +35,6 @@ def test_from_beats_rejects_misplaced_last(beats):
 def test_identity_invariant():
     packet = AxiStreamPacket(bytes(range(64)))
     assert AxiStreamPacket.from_beats(packet.to_beats(8), 8) == packet
+
+def test_prints_data_in_hex():
+    assert str(AxiStreamPacket(bytes([0x00, 0x01, 0xff]))) == "AxiStreamPacket(data=0x0001ff)"

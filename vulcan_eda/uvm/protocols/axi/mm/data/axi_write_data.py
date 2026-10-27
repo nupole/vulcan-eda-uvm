@@ -1,12 +1,13 @@
 import dataclasses
 
+from vulcan_eda.uvm.data.formatted_data import FormattedData
 from vulcan_eda.uvm.signals.bundle import Bundle
 from vulcan_eda.uvm.signals.constant import Constant
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class AxiWriteData:
-    data: int
-    strobe: int
+class AxiWriteData(FormattedData):
+    data: int = dataclasses.field(metadata={"format": "#x"})
+    strobe: int = dataclasses.field(metadata={"format": "#x"})
     last: bool = True
 
     @classmethod

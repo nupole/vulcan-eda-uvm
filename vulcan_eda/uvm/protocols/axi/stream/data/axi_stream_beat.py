@@ -1,10 +1,11 @@
 import dataclasses
 
+from vulcan_eda.uvm.data.formatted_data import FormattedData
 from vulcan_eda.uvm.signals.bundle import Bundle
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class AxiStreamBeat:
-    data: int
+class AxiStreamBeat(FormattedData):
+    data: int = dataclasses.field(metadata={"format": "#x"})
     last: bool
 
     @classmethod

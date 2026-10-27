@@ -40,3 +40,6 @@ def test_signals_reject_an_id_on_lite_defaults():
 def test_is_keyword_only():
     with pytest.raises(TypeError):
         AxiWriteResponse(AxiResponse.OKAY)
+
+def test_prints_the_response_by_name():
+    assert str(AxiWriteResponse(response=AxiResponse.SLVERR)) == "AxiWriteResponse(response=SLVERR, id=0)"

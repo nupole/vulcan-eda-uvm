@@ -1,18 +1,19 @@
 import dataclasses
 import enum
 
+from vulcan_eda.uvm.data.formatted_data import FormattedData
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_burst import AxiBurst
 from vulcan_eda.uvm.protocols.axi.mm.data.axi_response import AxiResponse
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
-class AxiTransaction:
+class AxiTransaction(FormattedData):
     class Access(enum.Enum):
         READ = enum.auto()
         WRITE = enum.auto()
 
     access: Access
-    address: int
-    data: tuple[int, ...] = ()
+    address: int = dataclasses.field(metadata={"format": "#x"})
+    data: tuple[int, ...] = dataclasses.field(default=(), metadata={"format": "#x"})
     num_beats: int = 1
     id: int = 0
     burst: AxiBurst = AxiBurst.INCR
