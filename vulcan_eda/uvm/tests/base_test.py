@@ -7,6 +7,8 @@ import cocotb.triggers
 import pyuvm
 import pyuvm.uvm_reporting.uvm_runtime_options
 
+from vulcan_eda.uvm.configs.tests.verdict_config import VerdictConfig
+
 class BaseTest(pyuvm.uvm_test):
     class _ErrorRecorder(logging.Handler):
         def __init__(self):
@@ -37,6 +39,7 @@ class BaseTest(pyuvm.uvm_test):
     def __init__(self, name, parent=None):
         pyuvm.set_sv_uvm_style_reporting_enabled(True)
         super().__init__(name, parent)
+        VerdictConfig(self).set(self, "*")
         self._error_recorder = BaseTest._ErrorRecorder()
         logging.getLogger("uvm").addHandler(self._error_recorder)
 

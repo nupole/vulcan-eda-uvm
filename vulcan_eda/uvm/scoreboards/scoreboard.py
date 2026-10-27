@@ -3,7 +3,7 @@ import dataclasses
 import cocotb.types
 import pyuvm
 
-from vulcan_eda.uvm.tests.base_test import BaseTest
+from vulcan_eda.uvm.configs.tests.verdict_config import VerdictConfig
 
 class Scoreboard(pyuvm.uvm_scoreboard):
     def build_phase(self):
@@ -13,11 +13,10 @@ class Scoreboard(pyuvm.uvm_scoreboard):
         self._mismatched_count = 0
 
     def end_of_elaboration_phase(self):
-        ancestor = self.get_parent()
-        while ancestor is not None and not isinstance(ancestor, BaseTest):
-            ancestor = ancestor.get_parent()
-        if ancestor is None:
-            raise pyuvm.UVMError(f"{self.get_full_name()} only reports errors, so its test must derive from vulcan_eda.uvm.tests.BaseTest to fail on them")
+        try:
+            VerdictConfig.get(self)
+        except pyuvm.UVMConfigItemNotFound as error:
+            raise pyuvm.UVMError(f"{self.get_full_name()} only reports errors, so something above it must fail the test on them: derive the test from vulcan_eda.uvm.tests.BaseTest or set a vulcan_eda.uvm.configs.tests.VerdictConfig") from error
 
     async def run_phase(self):
         while True:

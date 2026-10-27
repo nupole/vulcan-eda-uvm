@@ -7,6 +7,7 @@ import cocotb_tools.runner
 import pytest
 import pyuvm
 
+from vulcan_eda.uvm.configs.tests import VerdictConfig
 from vulcan_eda.uvm.tests import BaseTest
 
 FAILURE_REASON = "\n".join([
@@ -100,6 +101,10 @@ def test_reports_no_factory_overrides(base_test, caplog):
 def test_reports_elaboration_only_at_full_verbosity(base_test, caplog):
     base_test().end_of_elaboration_phase()
     assert messages(caplog) == []
+
+def test_owns_the_verdict_for_every_component_below_it(base_test):
+    test = base_test()
+    assert VerdictConfig.get(pyuvm.uvm_component("scoreboard", pyuvm.uvm_env("env", test))).owner is test
 
 def test_stimulus_must_be_overridden(base_test):
     with pytest.raises(NotImplementedError):

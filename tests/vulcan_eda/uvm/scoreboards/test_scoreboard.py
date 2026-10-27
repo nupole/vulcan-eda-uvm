@@ -7,6 +7,7 @@ import cocotb.types
 import pytest
 import pyuvm
 
+from vulcan_eda.uvm.configs.tests import VerdictConfig
 from vulcan_eda.uvm.scoreboards import Scoreboard
 
 class DrainingFifo:
@@ -94,7 +95,12 @@ def test_accepts_a_base_test_ancestor(base_test):
     environment = pyuvm.uvm_env("env", base_test())
     Scoreboard.create("scoreboard", environment).end_of_elaboration_phase()
 
-def test_requires_a_base_test_ancestor():
+def test_accepts_any_test_that_owns_the_verdict():
+    test = pyuvm.uvm_test("uvm_test_top", None)
+    VerdictConfig(test).set(test, "*")
+    Scoreboard.create("scoreboard", pyuvm.uvm_env("env", test)).end_of_elaboration_phase()
+
+def test_requires_a_verdict_owner():
     environment = pyuvm.uvm_env("env", pyuvm.uvm_test("uvm_test_top", None))
     with pytest.raises(pyuvm.UVMError, match="BaseTest"):
         Scoreboard.create("scoreboard", environment).end_of_elaboration_phase()
