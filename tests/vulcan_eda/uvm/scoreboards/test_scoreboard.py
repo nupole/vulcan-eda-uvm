@@ -2,6 +2,7 @@ import asyncio
 import collections
 import logging
 
+import cocotb.types
 import pytest
 import pyuvm
 
@@ -87,3 +88,19 @@ def test_requires_a_base_test_ancestor():
     environment = pyuvm.uvm_env("env", pyuvm.uvm_test("uvm_test_top", None))
     with pytest.raises(pyuvm.UVMError, match="BaseTest"):
         Scoreboard.create("scoreboard", environment).end_of_elaboration_phase()
+
+@pytest.mark.parametrize("actual_data, expected_data, message", [
+    (cocotb.types.LogicArray("00000111"), 6, "actual data 0x07 does not equal expected data 0x06"),
+    (cocotb.types.LogicArray("0000X111"), 7, "actual data 0b0000X111 does not equal expected data 0b00000111"),
+    ((cocotb.types.Logic("1"), cocotb.types.LogicArray("0101")), (0, 5), "actual data (0x1, 0x5) does not equal expected data (0x0, 0x5)"),
+    ((cocotb.types.LogicArray("0011"),), (2,), "actual data (0x3,) does not equal expected data (0x2,)"),
+    (cocotb.types.LogicArray("0011"), -1, "actual data 0011 does not equal expected data -1"),
+])
+def test_reports_a_mismatch_in_one_format_for_both_sides(scoreboard, caplog, actual_data, expected_data, message):
+    run(scoreboard, [actual_data], [expected_data])
+    assert messages(caplog, logging.ERROR) == [f"[MISMATCHED] {message}"]
+
+def test_reports_matches_in_the_shared_format(scoreboard, caplog):
+    scoreboard.set_report_verbosity(pyuvm.UVM_HIGH)
+    run(scoreboard, [cocotb.types.LogicArray("00000111")], [7])
+    assert messages(caplog, logging.INFO) == ["[MATCHED] matched 0x07"]
