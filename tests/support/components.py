@@ -38,6 +38,28 @@ class UpperSequencer(pyuvm.uvm_component):
         if rsp is not None:
             self.responses.append(rsp)
 
+class ScriptedDriver:
+    class Drained(Exception):
+        pass
+
+    def __init__(self, interface, script):
+        self.interface = interface
+        self.script = collections.deque(script)
+
+    async def next(self):
+        return self._pop()
+
+    async def try_next(self):
+        return self._pop()
+
+    async def drive(self, data):
+        await self.interface.drive_data(data)
+
+    def _pop(self):
+        if not self.script:
+            raise ScriptedDriver.Drained()
+        return self.script.popleft()
+
 class RecordingSubscriber(pyuvm.uvm_subscriber):
     def __init__(self, name, parent):
         super().__init__(name, parent)

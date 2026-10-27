@@ -1,6 +1,10 @@
 import asyncio
 
+import pytest
+
 import vulcan_eda.uvm
+
+from tests.support.components import ScriptedDriver
 
 class RecordingInterface(vulcan_eda.uvm.interfaces.SynchronousInterface):
     def __init__(self):
@@ -19,15 +23,17 @@ class RecordingInterface(vulcan_eda.uvm.interfaces.SynchronousInterface):
     async def get_data(self):
         ...
 
-def test_put_data_drives_after_the_write_edge():
+def run(script):
     recording_interface = RecordingInterface()
-    asyncio.run(recording_interface.put_data(5))
-    assert recording_interface.events == ["write_edge", 5]
+    with pytest.raises(ScriptedDriver.Drained):
+        asyncio.run(recording_interface.run(ScriptedDriver(recording_interface, script)))
+    return recording_interface.events
 
-def test_put_idle_drives_idle_after_the_write_edge():
-    recording_interface = RecordingInterface()
-    asyncio.run(recording_interface.put_idle())
-    assert recording_interface.events == ["write_edge", "idle"]
+def test_idles_on_every_edge_without_items():
+    assert run([None, None]) == ["write_edge", "idle", "write_edge", "idle", "write_edge"]
+
+def test_drives_items_on_consecutive_edges_then_idles():
+    assert run([1, 2, None]) == ["write_edge", 1, "write_edge", 2, "write_edge", "idle", "write_edge"]
 
 def test_base_interface_has_no_clock():
     assert not hasattr(vulcan_eda.uvm.interfaces.base_interface.BaseInterface, "write_edge")
