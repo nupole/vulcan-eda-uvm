@@ -1,8 +1,8 @@
 from vulcan_eda.uvm.generators.random_signal_generator import RandomSignalGenerator
-from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 from vulcan_eda.uvm.interfaces.data_interface import DataInterface
+from vulcan_eda.uvm.interfaces.synchronous_interface import SynchronousInterface
 
-class ValidDataInterface(BaseInterface):
+class ValidDataInterface(SynchronousInterface):
     def __init__(self, clk, valid, data, idle_generator=None):
         super().__init__(clk)
         self._valid_interface = DataInterface(clk, valid)

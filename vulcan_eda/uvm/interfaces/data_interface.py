@@ -1,8 +1,8 @@
 from vulcan_eda.uvm.generators.hold_generator import HoldGenerator
-from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
+from vulcan_eda.uvm.interfaces.synchronous_interface import SynchronousInterface
 from vulcan_eda.uvm.signals.signal import Signal
 
-class DataInterface(BaseInterface):
+class DataInterface(SynchronousInterface):
     def __init__(self, clk, data, idle_generator=None):
         super().__init__(clk)
         self._data = Signal.wrap(data)

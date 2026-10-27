@@ -1,8 +1,8 @@
-from vulcan_eda.uvm.interfaces.base_interface import BaseInterface
 from vulcan_eda.uvm.interfaces.data_interface import DataInterface
+from vulcan_eda.uvm.interfaces.synchronous_interface import SynchronousInterface
 from vulcan_eda.uvm.interfaces.valid_data_interface import ValidDataInterface
 
-class ReadyValidDataInterface(BaseInterface):
+class ReadyValidDataInterface(SynchronousInterface):
     def __init__(self, clk, ready, valid, data, data_type=None, idle_generator=None):
         super().__init__(clk)
         self._data_type = data_type
