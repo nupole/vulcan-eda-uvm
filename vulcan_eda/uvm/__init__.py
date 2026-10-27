@@ -11,3 +11,4 @@ import vulcan_eda.uvm.scoreboards
 import vulcan_eda.uvm.sequences
 import vulcan_eda.uvm.signals
 import vulcan_eda.uvm.subscribers
+import vulcan_eda.uvm.tests

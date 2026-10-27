@@ -48,7 +48,8 @@ packages = ["vulcan_eda.uvm",
             "vulcan_eda.uvm.scoreboards",
             "vulcan_eda.uvm.sequences",
             "vulcan_eda.uvm.signals",
-            "vulcan_eda.uvm.subscribers"]
+            "vulcan_eda.uvm.subscribers",
+            "vulcan_eda.uvm.tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
