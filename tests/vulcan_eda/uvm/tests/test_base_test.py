@@ -79,12 +79,31 @@ class DrainTimeTest(BaseTest):
     drain_time_ns = 30
 
     async def stimulus(self):
+        self.start_time = cocotb.simtime.get_sim_time("ns")
         await cocotb.triggers.Timer(10, unit="ns")
 
     def check_phase(self):
-        end_time = cocotb.simtime.get_sim_time("ns")
-        if end_time != 40:
-            self.uvm_report.error("DRAIN", f"run_phase ended at {end_time}ns instead of 40ns")
+        run_time = round(cocotb.simtime.get_sim_time("ns") - self.start_time)
+        if run_time != 40:
+            self.uvm_report.error("DRAIN", f"run_phase took {run_time}ns instead of 40ns")
+
+@pyuvm.test()
+class TimeoutTest(BaseTest):
+    timeout_us = 1
+
+    async def stimulus(self):
+        self.start_time = cocotb.simtime.get_sim_time("ns")
+        await cocotb.triggers.Event().wait()
+
+    def final_phase(self):
+        try:
+            super().final_phase()
+        except AssertionError as failure:
+            run_time = round(cocotb.simtime.get_sim_time("ns") - self.start_time)
+            if "1 TIMEOUT from uvm_test_top" not in str(failure) or run_time != 1000:
+                raise AssertionError(f"expected one TIMEOUT after 1000ns, got {run_time}ns and: {failure}") from failure
+        else:
+            raise AssertionError("a stimulus that never finishes did not fail the test")
 
 def test_base_test_bench(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

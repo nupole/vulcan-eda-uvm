@@ -27,6 +27,7 @@ class BaseTest(pyuvm.uvm_test):
                 self.first_error = f"first{sim_time} from {source}: {record.getMessage()}"
 
     drain_time_ns = 0
+    timeout_us = None
 
     # cocotb holds the regression seed only while test modules are collected, which is when this module is imported
     _REGRESSION_SEED = getattr(cocotb, "RANDOM_SEED", None)
@@ -49,13 +50,22 @@ class BaseTest(pyuvm.uvm_test):
 
     async def run_phase(self):
         self.raise_objection()
-        await self.stimulus()
-        if self.drain_time_ns:
-            await cocotb.triggers.Timer(self.drain_time_ns, unit="ns")
+        if self.timeout_us is None:
+            await self._stimulus_and_drain()
+        else:
+            try:
+                await cocotb.triggers.with_timeout(self._stimulus_and_drain(), self.timeout_us, "us")
+            except cocotb.triggers.SimTimeoutError:
+                self.uvm_report.error("TIMEOUT", f"stimulus and drain did not finish within {self.timeout_us}us")
         self.drop_objection()
 
     async def stimulus(self):
         raise NotImplementedError
+
+    async def _stimulus_and_drain(self):
+        await self.stimulus()
+        if self.drain_time_ns:
+            await cocotb.triggers.Timer(self.drain_time_ns, unit="ns")
 
     def final_phase(self):
         logging.getLogger("uvm").removeHandler(self._error_recorder)
