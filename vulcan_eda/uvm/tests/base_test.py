@@ -1,13 +1,40 @@
+import collections
+import logging
+
+import cocotb
+import cocotb.simtime
 import pyuvm
 import pyuvm.uvm_reporting.uvm_runtime_options
 
 class BaseTest(pyuvm.uvm_test):
+    class _ErrorRecorder(logging.Handler):
+        def __init__(self):
+            super().__init__(logging.ERROR)
+            self.counts = collections.Counter()
+            self.first_error = None
+
+        def emit(self, record):
+            if not getattr(record, "_uvm_report_record", False):
+                return
+            source = getattr(record, "uvm_full_name", record.name)
+            self.counts[(source, getattr(record, "report_id", ""))] += 1
+            if self.first_error is None:
+                try:
+                    sim_time = f" at {cocotb.simtime.get_sim_time('ns'):.2f}ns"
+                except RuntimeError:
+                    sim_time = ""
+                self.first_error = f"first{sim_time} from {source}: {record.getMessage()}"
+
+    # cocotb holds the regression seed only while test modules are collected, which is when this module is imported
+    _REGRESSION_SEED = getattr(cocotb, "RANDOM_SEED", None)
     _QUIT_COUNT_OPTIONS = ("max_quit_count", "MAX_QUIT_COUNT", "UVM_MAX_QUIT_COUNT")
     _VERBOSITY_OPTION = "UVM_VERBOSITY"
 
     def __init__(self, name, parent=None):
         pyuvm.set_sv_uvm_style_reporting_enabled(True)
         super().__init__(name, parent)
+        self._error_recorder = BaseTest._ErrorRecorder()
+        logging.getLogger("uvm").addHandler(self._error_recorder)
 
     def configure_uvm_reporting(self):
         report_server = super().configure_uvm_reporting()
@@ -18,8 +45,22 @@ class BaseTest(pyuvm.uvm_test):
         return report_server
 
     def final_phase(self):
+        logging.getLogger("uvm").removeHandler(self._error_recorder)
         report_server = pyuvm.uvm_report_server.get()
         report_server.log_summary(self.logger)
-        failure = report_server.log_final_status(self.logger)
+        failure = report_server.failure_message()
+        if failure is not None:
+            failure = self._failure_reason(failure)
+            self.uvm_report.error("TEST_FAILED", failure)
+        report_server.log_final_status(self.logger, prior_failure_msg=failure)
         if failure is not None:
             raise AssertionError(failure)
+
+    def _failure_reason(self, failure):
+        lines = [failure]
+        lines += [f"{count} {report_id} from {source}" for (source, report_id), count in self._error_recorder.counts.most_common()]
+        if self._error_recorder.first_error is not None:
+            lines.append(self._error_recorder.first_error)
+        if BaseTest._REGRESSION_SEED is not None:
+            lines.append(f"rerun with COCOTB_RANDOM_SEED={BaseTest._REGRESSION_SEED}")
+        return "\n".join(lines)
