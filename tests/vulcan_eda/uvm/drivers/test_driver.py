@@ -7,6 +7,8 @@ from vulcan_eda.uvm.drivers.driver import Driver
 from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
 
+from tests.support.data import Unprintable
+
 class Interface:
     def __init__(self):
         self.cycles = []
@@ -97,3 +99,6 @@ def test_reports_driven_items_at_high_verbosity(caplog):
     driver = create_driver()
     driver.set_report_verbosity(pyuvm.UVM_HIGH)
     assert reported_messages(caplog, driver, [DataSequenceItem("item", 1), IdleSequenceItem("idle"), DataSequenceItem("item", 2)]) == ["[DROVE] drove 1", "[DROVE] drove 2", "[SUMMARY] drove 2 item(s)"]
+
+def test_formats_no_driven_item_below_high_verbosity():
+    assert drive(create_driver(), [DataSequenceItem("item", Unprintable())])[1] == 1

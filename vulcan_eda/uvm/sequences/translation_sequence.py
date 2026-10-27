@@ -16,11 +16,14 @@ class TranslationSequence(pyuvm.uvm_sequence):
         while True:
             upper_item = await self.upper_sequencer.get_next_item()
             response = await self.translate(upper_item)
+            report_translated = pyuvm.UVM_HIGH <= self.upper_sequencer.get_report_verbosity()
             if response is None:
-                self.upper_sequencer.uvm_report.info("TRANSLATED", f"translated {upper_item.data}", pyuvm.UVM_HIGH)
+                if report_translated:
+                    self.upper_sequencer.uvm_report.info("TRANSLATED", f"translated {upper_item.data}", pyuvm.UVM_HIGH)
                 self.upper_sequencer.seq_item_export.item_done()
             else:
-                self.upper_sequencer.uvm_report.info("TRANSLATED", f"translated {upper_item.data}, responded {response}", pyuvm.UVM_HIGH)
+                if report_translated:
+                    self.upper_sequencer.uvm_report.info("TRANSLATED", f"translated {upper_item.data}, responded {response}", pyuvm.UVM_HIGH)
                 response_item = DataSequenceItem('translation_response_item', response)
                 response_item.set_id_info(upper_item)
                 self.upper_sequencer.seq_item_export.item_done(response_item)

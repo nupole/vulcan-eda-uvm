@@ -23,12 +23,14 @@ class Scoreboard(pyuvm.uvm_scoreboard):
             actual_data = await self.actual_data_analysis_fifo.peek()
             expected_data = await self.expected_data_analysis_fifo.get()
             self.actual_data_analysis_fifo.try_get()
-            actual_text, expected_text = Scoreboard._format_pair(actual_data, expected_data)
             if actual_data == expected_data:
                 self._matched_count += 1
-                self.uvm_report.info("MATCHED", f"matched {actual_text}", pyuvm.UVM_HIGH)
+                if pyuvm.UVM_HIGH <= self.get_report_verbosity():
+                    actual_text, _ = Scoreboard._format_pair(actual_data, expected_data)
+                    self.uvm_report.info("MATCHED", f"matched {actual_text}", pyuvm.UVM_HIGH)
             else:
                 self._mismatched_count += 1
+                actual_text, expected_text = Scoreboard._format_pair(actual_data, expected_data)
                 self.uvm_report.error("MISMATCHED", Scoreboard._mismatch_message(actual_data, expected_data, actual_text, expected_text))
 
     def check_phase(self):

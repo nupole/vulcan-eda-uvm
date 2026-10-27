@@ -12,7 +12,8 @@ class Monitor(pyuvm.uvm_monitor):
         while True:
             data = await self._interface.get_data()
             self._monitored_count += 1
-            self.uvm_report.info("MONITORED", f"monitored {data}", pyuvm.UVM_HIGH)
+            if pyuvm.UVM_HIGH <= self.get_report_verbosity():
+                self.uvm_report.info("MONITORED", f"monitored {data}", pyuvm.UVM_HIGH)
             self.analysis_port.write(data)
 
     def report_phase(self):

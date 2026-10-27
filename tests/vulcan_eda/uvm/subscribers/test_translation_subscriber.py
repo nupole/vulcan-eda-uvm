@@ -3,6 +3,8 @@ import pyuvm
 
 from vulcan_eda.uvm.subscribers.translation_subscriber import TranslationSubscriber
 
+from tests.support.data import Unprintable
+
 class ChannelTaggingTranslationSubscriber(TranslationSubscriber):
     channels = ("x", "y")
     copies = 1
@@ -52,3 +54,8 @@ def test_reports_translated_items_at_high_verbosity(caplog, recording_subscriber
     translation_subscriber = build(recording_subscriber, copies=1)
     translation_subscriber.set_report_verbosity(pyuvm.UVM_HIGH)
     assert reported_messages(caplog, translation_subscriber, ["a", "b"]) == ["[TRANSLATED] translated ('x', 'a')", "[TRANSLATED] translated ('x', 'b')", "[SUMMARY] translated 2 item(s)"]
+
+def test_formats_no_translated_item_below_high_verbosity(recording_subscriber):
+    unprintable = Unprintable()
+    build(recording_subscriber, copies=1).analysis_exports["x"].write(unprintable)
+    assert recording_subscriber.items == [("x", unprintable)]

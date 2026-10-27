@@ -7,6 +7,7 @@ import pyuvm
 import vulcan_eda.uvm
 
 from tests.support.components import ScriptedDriver, create_agent
+from tests.support.data import Unprintable
 from tests.support.generators import take
 from tests.support.signals import Handle
 
@@ -36,3 +37,7 @@ def test_scripted_driver_drives_data_onto_its_interface():
 
 def test_handle_has_its_own_value_change_trigger():
     assert isinstance(Handle(8).value_change, cocotb.triggers.Trigger) and Handle(8).value_change is not Handle(8).value_change
+
+def test_unprintable_fails_when_formatted():
+    with pytest.raises(AssertionError, match="filtered out"):
+        f"{Unprintable()} {[Unprintable()]}"

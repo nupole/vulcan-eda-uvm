@@ -27,7 +27,8 @@ class Driver(pyuvm.uvm_driver):
         else:
             await self._interface.drive_data(sequence_item.data)
             self._driven_count += 1
-            self.uvm_report.info("DROVE", f"drove {sequence_item.data}", pyuvm.UVM_HIGH)
+            if pyuvm.UVM_HIGH <= self.get_report_verbosity():
+                self.uvm_report.info("DROVE", f"drove {sequence_item.data}", pyuvm.UVM_HIGH)
         self.seq_item_port.item_done()
 
     def report_phase(self):

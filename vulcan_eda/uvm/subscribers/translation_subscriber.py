@@ -19,7 +19,8 @@ class TranslationSubscriber(pyuvm.uvm_component):
     def write(self, channel, lower_item):
         for upper_item in self.translate(channel, lower_item):
             self._translated_count += 1
-            self.uvm_report.info("TRANSLATED", f"translated {upper_item}", pyuvm.UVM_HIGH)
+            if pyuvm.UVM_HIGH <= self.get_report_verbosity():
+                self.uvm_report.info("TRANSLATED", f"translated {upper_item}", pyuvm.UVM_HIGH)
             self.analysis_port.write(upper_item)
 
     def report_phase(self):

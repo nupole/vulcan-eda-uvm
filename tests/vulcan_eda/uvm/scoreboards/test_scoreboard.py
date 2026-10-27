@@ -10,6 +10,8 @@ import pyuvm
 from vulcan_eda.uvm.configs.tests import VerdictConfig
 from vulcan_eda.uvm.scoreboards import Scoreboard
 
+from tests.support.data import Unprintable
+
 class DrainingFifo:
     class Drained(Exception):
         pass
@@ -124,3 +126,8 @@ def test_reports_matches_in_the_shared_format(scoreboard, caplog):
     scoreboard.set_report_verbosity(pyuvm.UVM_HIGH)
     run(scoreboard, [cocotb.types.LogicArray("00000111")], [7])
     assert messages(caplog, logging.INFO) == ["[MATCHED] matched 0x07"]
+
+def test_formats_no_match_below_high_verbosity(scoreboard, caplog):
+    unprintable = Unprintable()
+    run(scoreboard, [unprintable], [unprintable])
+    assert messages(caplog, logging.ERROR) == []

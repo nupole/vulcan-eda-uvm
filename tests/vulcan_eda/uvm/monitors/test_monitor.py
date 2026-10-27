@@ -6,6 +6,8 @@ import pyuvm
 from vulcan_eda.uvm.configs.agents.agent_config import AgentConfig
 from vulcan_eda.uvm.monitors.monitor import Monitor
 
+from tests.support.data import Unprintable
+
 class Stop(Exception):
     pass
 
@@ -51,3 +53,8 @@ def test_reports_monitored_items_at_high_verbosity(caplog, recording_subscriber)
     monitor = create_monitor([1, 2], recording_subscriber)
     monitor.set_report_verbosity(pyuvm.UVM_HIGH)
     assert reported_messages(caplog, monitor) == ["[MONITORED] monitored 1", "[MONITORED] monitored 2", "[SUMMARY] monitored 2 item(s)"]
+
+def test_formats_no_monitored_item_below_high_verbosity(recording_subscriber):
+    unprintable = Unprintable()
+    run(create_monitor([unprintable], recording_subscriber))
+    assert recording_subscriber.items == [unprintable]
