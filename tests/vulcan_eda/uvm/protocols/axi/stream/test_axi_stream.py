@@ -33,7 +33,7 @@ class AxiStreamEnv(pyuvm.uvm_env):
         self.downstream_environment = AxiStreamEnvironment.create("downstream_environment", self)
         AxiStreamEnvironmentConfig.from_prefix(dut, "downstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.RECEIVER, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "passive_environment")
         self.passive_environment = AxiStreamEnvironment.create("passive_environment", self)
-        transfer_interface = vulcan_eda.uvm.interfaces.DataInterface(dut.clk, vulcan_eda.uvm.signals.Bundle(dut.downstream_tready, dut.downstream_tvalid, dut.downstream_tlast))
+        transfer_interface = vulcan_eda.uvm.interfaces.SynchronousDataInterface(dut.clk, vulcan_eda.uvm.signals.Bundle(dut.downstream_tready, dut.downstream_tvalid, dut.downstream_tlast))
         self.transfer_agent = create_agent(self, "transfer_agent", transfer_interface, pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.transfer_recorder = RecordingSubscriber.create("transfer_recorder", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)

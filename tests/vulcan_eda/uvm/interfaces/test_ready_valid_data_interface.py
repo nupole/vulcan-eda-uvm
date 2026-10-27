@@ -93,7 +93,7 @@ class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
         dut = cocotb.top
         self.upstream_agent = create_agent(self, "upstream_agent", vulcan_eda.uvm.interfaces.ReadyValidDataTransmitterInterface(dut.clk, dut.upstream_ready, dut.upstream_valid, dut.upstream_data))
         self.downstream_agent = create_agent(self, "downstream_agent", vulcan_eda.uvm.interfaces.ReadyValidDataReceiverInterface(dut.clk, dut.downstream_ready, dut.downstream_valid, dut.downstream_data))
-        self.handshake_agent = create_agent(self, "handshake_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, vulcan_eda.uvm.signals.Bundle(dut.downstream_ready, dut.downstream_valid)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.handshake_agent = create_agent(self, "handshake_agent", vulcan_eda.uvm.interfaces.SynchronousDataInterface(dut.clk, vulcan_eda.uvm.signals.Bundle(dut.downstream_ready, dut.downstream_valid)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.handshake_recorder = RecordingSubscriber.create("handshake_recorder", self)
         self.scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("scoreboard", self)
 

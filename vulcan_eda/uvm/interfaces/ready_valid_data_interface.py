@@ -1,4 +1,4 @@
-from vulcan_eda.uvm.interfaces.data_interface import DataInterface
+from vulcan_eda.uvm.interfaces.synchronous_data_interface import SynchronousDataInterface
 from vulcan_eda.uvm.interfaces.synchronous_interface import SynchronousInterface
 from vulcan_eda.uvm.interfaces.valid_data_interface import ValidDataInterface
 
@@ -8,7 +8,7 @@ class ReadyValidDataInterface(SynchronousInterface):
         self._data_type = data_type
         if data_type is not None:
             data = data_type.signals(**data)
-        self._ready_interface = DataInterface(clk, ready, idle_generator)
+        self._ready_interface = SynchronousDataInterface(clk, ready, idle_generator)
         self._valid_data_interface = ValidDataInterface(clk, valid, data, idle_generator)
 
     async def get_data(self):

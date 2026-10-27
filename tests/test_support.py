@@ -18,7 +18,7 @@ def test_take_returns_the_first_values():
 
 def test_create_agent_configures_and_creates_an_agent():
     parent = pyuvm.uvm_component("parent", None)
-    interface = vulcan_eda.uvm.interfaces.DataInterface(None, Handle(8))
+    interface = vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, Handle(8))
     agent = create_agent(parent, "agent", interface, pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
     assert (agent.get_name(), vulcan_eda.uvm.configs.agents.AgentConfig.get(agent).is_active) == ("agent", pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
 
@@ -30,5 +30,5 @@ def test_scripted_driver_hands_out_its_script_then_drains():
 
 def test_scripted_driver_drives_data_onto_its_interface():
     handle = Handle(8)
-    asyncio.run(ScriptedDriver(vulcan_eda.uvm.interfaces.DataInterface(None, handle), []).drive(5))
+    asyncio.run(ScriptedDriver(vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, handle), []).drive(5))
     assert handle.value == 5

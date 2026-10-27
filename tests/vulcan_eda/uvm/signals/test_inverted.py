@@ -62,10 +62,10 @@ def test_rejects_signals_without_a_width():
 class InvertedEnv(pyuvm.uvm_env):
     def build_phase(self):
         dut = cocotb.top
-        self.stimulus_agent = create_agent(self, "stimulus_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(dut.ref_bit_in, Inverted(dut.bit_n_in), dut.ref_bus_in, Inverted(dut.bus_n_in))))
-        self.reference_agent = create_agent(self, "reference_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(dut.ref_bit_out, dut.ref_bus_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
-        self.write_agent = create_agent(self, "write_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(dut.bit_out, dut.bus_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
-        self.read_agent = create_agent(self, "read_agent", vulcan_eda.uvm.interfaces.DataInterface(dut.clk, Bundle(Inverted(dut.bit_n_out), Inverted(dut.bus_n_out))), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.stimulus_agent = create_agent(self, "stimulus_agent", vulcan_eda.uvm.interfaces.SynchronousDataInterface(dut.clk, Bundle(dut.ref_bit_in, Inverted(dut.bit_n_in), dut.ref_bus_in, Inverted(dut.bus_n_in))))
+        self.reference_agent = create_agent(self, "reference_agent", vulcan_eda.uvm.interfaces.SynchronousDataInterface(dut.clk, Bundle(dut.ref_bit_out, dut.ref_bus_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.write_agent = create_agent(self, "write_agent", vulcan_eda.uvm.interfaces.SynchronousDataInterface(dut.clk, Bundle(dut.bit_out, dut.bus_out)), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
+        self.read_agent = create_agent(self, "read_agent", vulcan_eda.uvm.interfaces.SynchronousDataInterface(dut.clk, Bundle(Inverted(dut.bit_n_out), Inverted(dut.bus_n_out))), pyuvm.uvm_active_passive_enum.UVM_PASSIVE)
         self.write_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("write_scoreboard", self)
         self.read_scoreboard = vulcan_eda.uvm.scoreboards.Scoreboard.create("read_scoreboard", self)
 

@@ -1,12 +1,12 @@
 from vulcan_eda.uvm.generators.random_signal_generator import RandomSignalGenerator
-from vulcan_eda.uvm.interfaces.data_interface import DataInterface
+from vulcan_eda.uvm.interfaces.synchronous_data_interface import SynchronousDataInterface
 from vulcan_eda.uvm.interfaces.synchronous_interface import SynchronousInterface
 
 class ValidDataInterface(SynchronousInterface):
     def __init__(self, clk, valid, data, idle_generator=None):
         super().__init__(clk)
-        self._valid_interface = DataInterface(clk, valid)
-        self._data_interface = DataInterface(clk, data, RandomSignalGenerator(data) if idle_generator is None else idle_generator)
+        self._valid_interface = SynchronousDataInterface(clk, valid)
+        self._data_interface = SynchronousDataInterface(clk, data, RandomSignalGenerator(data) if idle_generator is None else idle_generator)
 
     async def drive_data(self, data):
         self.write_valid_data(1, data)
