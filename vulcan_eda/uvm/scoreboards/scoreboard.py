@@ -1,11 +1,20 @@
 import pyuvm
 
+from vulcan_eda.uvm.tests.base_test import BaseTest
+
 class Scoreboard(pyuvm.uvm_scoreboard):
     def build_phase(self):
         self.actual_data_analysis_fifo = pyuvm.uvm_tlm_analysis_fifo('actual_data_analysis_fifo', self)
         self.expected_data_analysis_fifo = pyuvm.uvm_tlm_analysis_fifo('expected_data_analysis_fifo', self)
         self._matched_count = 0
         self._mismatched_count = 0
+
+    def end_of_elaboration_phase(self):
+        ancestor = self.get_parent()
+        while ancestor is not None and not isinstance(ancestor, BaseTest):
+            ancestor = ancestor.get_parent()
+        if ancestor is None:
+            raise pyuvm.UVMError(f"{self.get_full_name()} only reports errors, so its test must derive from vulcan_eda.uvm.tests.BaseTest to fail on them")
 
     async def run_phase(self):
         while True:
@@ -20,16 +29,10 @@ class Scoreboard(pyuvm.uvm_scoreboard):
                 self.uvm_report.error("MISMATCHED", f"actual data {actual_data} does not equal expected data {expected_data}")
 
     def check_phase(self):
-        failures = []
-        if self._mismatched_count:
-            failures.append(f"{self._mismatched_count} mismatched")
         for kind, analysis_fifo in (("actual", self.actual_data_analysis_fifo), ("expected", self.expected_data_analysis_fifo)):
             if not analysis_fifo.is_empty():
                 self.uvm_report.error("UNCOMPARED", f"{analysis_fifo.used()} {kind} data never compared")
-                failures.append(f"{analysis_fifo.used()} {kind} never compared")
         compared_count = self._matched_count + self._mismatched_count
         self.uvm_report.info("SUMMARY", f"compared {compared_count}: {self._matched_count} matched, {self._mismatched_count} mismatched", pyuvm.UVM_LOW)
         if not compared_count:
             self.uvm_report.warning("NOTHING_COMPARED", "compared nothing")
-        if failures:
-            raise AssertionError(f"{self.get_full_name()} failed: {', '.join(failures)}")

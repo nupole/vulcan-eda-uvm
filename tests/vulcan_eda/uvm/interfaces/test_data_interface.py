@@ -47,7 +47,7 @@ class DataInterfaceEnv(pyuvm.uvm_env):
         self.downstream_agent.analysis_port.connect(self.data_recorder.analysis_export)
 
 @pyuvm.test()
-class DataInterfaceTest(pyuvm.uvm_test):
+class DataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
     def build_phase(self):
         self.env = DataInterfaceEnv("env", self)
 

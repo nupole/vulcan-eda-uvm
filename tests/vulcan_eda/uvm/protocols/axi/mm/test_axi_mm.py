@@ -50,7 +50,7 @@ class AxiMmEnv(pyuvm.uvm_env):
         self.passive_axi_environment.analysis_port.connect(self.passive_scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()
-class AxiMmTest(pyuvm.uvm_test):
+class AxiMmTest(vulcan_eda.uvm.tests.BaseTest):
     def build_phase(self):
         self.env = AxiMmEnv("env", self)
 

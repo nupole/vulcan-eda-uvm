@@ -60,23 +60,30 @@ def test_reports_matches_at_high_verbosity(scoreboard, caplog):
     run(scoreboard, [1, 2], [1, 2])
     assert messages(caplog, logging.INFO) == ["[MATCHED] matched 1", "[MATCHED] matched 2"]
 
-def test_logs_every_mismatch_and_fails_once_at_the_end(scoreboard, caplog):
+def test_reports_every_mismatch(scoreboard, caplog):
     run(scoreboard, [1, 2, 3], [9, 2, 8])
+    scoreboard.check_phase()
     assert messages(caplog, logging.ERROR) == ["[MISMATCHED] actual data 1 does not equal expected data 9", "[MISMATCHED] actual data 3 does not equal expected data 8"]
-    with pytest.raises(AssertionError, match="2 mismatched"):
-        scoreboard.check_phase()
     assert messages(caplog, logging.INFO) == ["[SUMMARY] compared 3: 1 matched, 2 mismatched"]
 
 @pytest.mark.parametrize("kind, actual_data, expected_data", [
     ("actual", [1, 2], [1]),
     ("expected", [1], [1, 2]),
 ])
-def test_fails_on_data_never_compared(scoreboard, caplog, kind, actual_data, expected_data):
+def test_reports_data_never_compared(scoreboard, caplog, kind, actual_data, expected_data):
     run(scoreboard, actual_data, expected_data)
-    with pytest.raises(AssertionError, match=f"1 {kind} never compared"):
-        scoreboard.check_phase()
+    scoreboard.check_phase()
     assert messages(caplog, logging.ERROR) == [f"[UNCOMPARED] 1 {kind} data never compared"]
 
 def test_warns_when_nothing_was_compared(scoreboard, caplog):
     scoreboard.check_phase()
     assert messages(caplog, logging.WARNING) == ["[NOTHING_COMPARED] compared nothing"]
+
+def test_accepts_a_base_test_ancestor(base_test):
+    environment = pyuvm.uvm_env("env", base_test())
+    Scoreboard.create("scoreboard", environment).end_of_elaboration_phase()
+
+def test_requires_a_base_test_ancestor():
+    environment = pyuvm.uvm_env("env", pyuvm.uvm_test("uvm_test_top", None))
+    with pytest.raises(pyuvm.UVMError, match="BaseTest"):
+        Scoreboard.create("scoreboard", environment).end_of_elaboration_phase()

@@ -1,20 +1,5 @@
-import logging
-
 import pytest
 import pyuvm
-
-from vulcan_eda.uvm.tests import BaseTest
-
-@pytest.fixture
-def base_test(monkeypatch, caplog):
-    for option in ("max_quit_count", "MAX_QUIT_COUNT", "UVM_MAX_QUIT_COUNT", "UVM_VERBOSITY"):
-        monkeypatch.delenv(option, raising=False)
-    uvm_logger = logging.getLogger("uvm")
-    uvm_logger.addHandler(caplog.handler)
-    yield lambda: BaseTest.create("uvm_test_top", None)
-    uvm_logger.removeHandler(caplog.handler)
-    pyuvm.uvm_report_server.get().shutdown()
-    pyuvm.set_sv_uvm_style_reporting_enabled(False)
 
 def report(base_test):
     component = pyuvm.uvm_component("component", base_test)
@@ -43,3 +28,14 @@ def test_keeps_a_given_verbosity(base_test, caplog, monkeypatch):
     monkeypatch.setenv("UVM_VERBOSITY", "HIGH")
     report(base_test())
     assert "high" in messages(caplog)
+
+def test_passes_without_errors(base_test, caplog):
+    base_test().final_phase()
+    assert "TEST_STATUS: PASSED" in messages(caplog)
+
+def test_fails_once_at_the_end_on_reported_errors(base_test, caplog):
+    test = base_test()
+    report(test)
+    with pytest.raises(AssertionError, match="2 error"):
+        test.final_phase()
+    assert "TEST_STATUS: FAILED" in messages(caplog)

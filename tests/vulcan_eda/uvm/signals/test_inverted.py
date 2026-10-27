@@ -76,7 +76,7 @@ class InvertedEnv(pyuvm.uvm_env):
         self.read_agent.analysis_port.connect(self.read_scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()
-class InvertedTest(pyuvm.uvm_test):
+class InvertedTest(vulcan_eda.uvm.tests.BaseTest):
     def build_phase(self):
         self.env = InvertedEnv("env", self)
 

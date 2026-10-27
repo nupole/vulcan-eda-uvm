@@ -44,7 +44,7 @@ class ValidDataInterfaceEnv(pyuvm.uvm_env):
         self.downstream_agent.analysis_port.connect(self.scoreboard.actual_data_analysis_fifo.analysis_export)
 
 @pyuvm.test()
-class ValidDataInterfaceTest(pyuvm.uvm_test):
+class ValidDataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
     def build_phase(self):
         self.env = ValidDataInterfaceEnv("env", self)
 

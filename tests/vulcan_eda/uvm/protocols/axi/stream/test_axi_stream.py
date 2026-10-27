@@ -46,7 +46,7 @@ class AxiStreamEnv(pyuvm.uvm_env):
         self.transfer_agent.analysis_port.connect(self.transfer_recorder.analysis_export)
 
 @pyuvm.test()
-class AxiStreamTest(pyuvm.uvm_test):
+class AxiStreamTest(vulcan_eda.uvm.tests.BaseTest):
     def build_phase(self):
         self.env = AxiStreamEnv("env", self)
 

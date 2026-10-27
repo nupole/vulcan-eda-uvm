@@ -16,3 +16,10 @@ class BaseTest(pyuvm.uvm_test):
         if pyuvm.uvm_reporting.uvm_runtime_options.get_runtime_option(self._VERBOSITY_OPTION) is None:
             self.set_report_verbosity(pyuvm.UVM_MEDIUM)
         return report_server
+
+    def final_phase(self):
+        report_server = pyuvm.uvm_report_server.get()
+        report_server.log_summary(self.logger)
+        failure = report_server.log_final_status(self.logger)
+        if failure is not None:
+            raise AssertionError(failure)

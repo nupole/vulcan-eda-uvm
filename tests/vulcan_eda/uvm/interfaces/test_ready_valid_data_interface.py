@@ -113,7 +113,7 @@ class ReadyValidDataInterfaceEnv(pyuvm.uvm_env):
         self.handshake_agent.analysis_port.connect(self.handshake_recorder.analysis_export)
 
 @pyuvm.test()
-class ReadyValidDataInterfaceTest(pyuvm.uvm_test):
+class ReadyValidDataInterfaceTest(vulcan_eda.uvm.tests.BaseTest):
     def build_phase(self):
         self.env = ReadyValidDataInterfaceEnv("env", self)
 
