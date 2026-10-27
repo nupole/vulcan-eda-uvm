@@ -1,6 +1,7 @@
 import vulcan_eda.uvm.agents
 import vulcan_eda.uvm.configs.agents
 import vulcan_eda.uvm.configs.layers
+import vulcan_eda.uvm.data
 import vulcan_eda.uvm.drivers
 import vulcan_eda.uvm.generators
 import vulcan_eda.uvm.interfaces
