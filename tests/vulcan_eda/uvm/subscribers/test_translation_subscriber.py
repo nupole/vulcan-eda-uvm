@@ -1,4 +1,5 @@
 import pytest
+import pyuvm
 
 from vulcan_eda.uvm.subscribers.translation_subscriber import TranslationSubscriber
 
@@ -32,3 +33,22 @@ def test_publishes_nothing_until_translation_completes(recording_subscriber):
 def test_translate_must_be_overridden():
     with pytest.raises(NotImplementedError):
         TranslationSubscriber.create("translation_subscriber", None).translate("x", "a")
+
+def reported_messages(caplog, translation_subscriber, lower_items):
+    translation_subscriber.logger.addHandler(caplog.handler)
+    try:
+        for lower_item in lower_items:
+            translation_subscriber.analysis_exports["x"].write(lower_item)
+        translation_subscriber.report_phase()
+    finally:
+        translation_subscriber.logger.removeHandler(caplog.handler)
+    return [record.getMessage() for record in caplog.records]
+
+def test_reports_a_summary_of_translated_items(caplog, recording_subscriber):
+    translation_subscriber = build(recording_subscriber, copies=2)
+    assert reported_messages(caplog, translation_subscriber, ["a"]) == ["[SUMMARY] translated 2 item(s)"]
+
+def test_reports_translated_items_at_high_verbosity(caplog, recording_subscriber):
+    translation_subscriber = build(recording_subscriber, copies=1)
+    translation_subscriber.set_report_verbosity(pyuvm.UVM_HIGH)
+    assert reported_messages(caplog, translation_subscriber, ["a", "b"]) == ["[TRANSLATED] translated ('x', 'a')", "[TRANSLATED] translated ('x', 'b')", "[SUMMARY] translated 2 item(s)"]
