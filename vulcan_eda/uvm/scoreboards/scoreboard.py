@@ -1,3 +1,5 @@
+import dataclasses
+
 import cocotb.types
 import pyuvm
 
@@ -28,7 +30,7 @@ class Scoreboard(pyuvm.uvm_scoreboard):
                 self.uvm_report.info("MATCHED", f"matched {actual_text}", pyuvm.UVM_HIGH)
             else:
                 self._mismatched_count += 1
-                self.uvm_report.error("MISMATCHED", f"actual data {actual_text} does not equal expected data {expected_text}")
+                self.uvm_report.error("MISMATCHED", Scoreboard._mismatch_message(actual_data, expected_data, actual_text, expected_text))
 
     def check_phase(self):
         for kind, analysis_fifo in (("actual", self.actual_data_analysis_fifo), ("expected", self.expected_data_analysis_fifo)):
@@ -38,6 +40,14 @@ class Scoreboard(pyuvm.uvm_scoreboard):
         self.uvm_report.info("SUMMARY", f"compared {compared_count}: {self._matched_count} matched, {self._mismatched_count} mismatched", pyuvm.UVM_LOW)
         if not compared_count:
             self.uvm_report.warning("NOTHING_COMPARED", "compared nothing")
+
+    @staticmethod
+    def _mismatch_message(actual_data, expected_data, actual_text, expected_text):
+        lines = ["actual data does not equal expected data", f"actual:   {actual_text}", f"expected: {expected_text}"]
+        if dataclasses.is_dataclass(actual_data) and type(actual_data) is type(expected_data):
+            differing_fields = [field.name for field in dataclasses.fields(actual_data) if getattr(actual_data, field.name) != getattr(expected_data, field.name)]
+            lines.append(f"differs in: {', '.join(differing_fields)}")
+        return "\n".join(lines)
 
     @staticmethod
     def _format_pair(actual_data, expected_data):
