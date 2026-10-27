@@ -1,7 +1,9 @@
 import asyncio
 
 import pytest
+import pyuvm
 
+from vulcan_eda.uvm.configs.agents.agent_config import AgentConfig
 from vulcan_eda.uvm.drivers.driver import Driver
 from vulcan_eda.uvm.sequences.data_sequence_item import DataSequenceItem
 from vulcan_eda.uvm.sequences.idle_sequence_item import IdleSequenceItem
@@ -44,12 +46,20 @@ class SequenceItemPort:
     def item_done(self):
         self.done += 1
 
-def run(sequence_items, edges):
+def create_driver(edges):
+    AgentConfig(Interface(edges)).set(None, "driver")
     driver = Driver.create("driver", None)
-    driver._interface = Interface(edges)
+    driver.build_phase()
+    return driver
+
+def run_driver(driver, sequence_items):
     driver.seq_item_port = SequenceItemPort(sequence_items)
     with pytest.raises(Stop):
         asyncio.run(driver.run_phase())
+
+def run(sequence_items, edges):
+    driver = create_driver(edges)
+    run_driver(driver, sequence_items)
     return driver._interface.cycles, driver.seq_item_port.done
 
 def test_idles_on_every_edge_without_items():
@@ -60,3 +70,21 @@ def test_drives_items_on_consecutive_edges_then_idles():
 
 def test_idles_for_an_idle_item():
     assert run([DataSequenceItem("item", 1), IdleSequenceItem("idle"), DataSequenceItem("item", 2)], 3) == ([1, "idle", 2], 3)
+
+def reported_messages(caplog, driver, sequence_items):
+    driver.logger.addHandler(caplog.handler)
+    try:
+        run_driver(driver, sequence_items)
+        driver.report_phase()
+    finally:
+        driver.logger.removeHandler(caplog.handler)
+    return [record.getMessage() for record in caplog.records]
+
+def test_reports_a_summary_of_driven_items(caplog):
+    driver = create_driver(3)
+    assert reported_messages(caplog, driver, [DataSequenceItem("item", 1), IdleSequenceItem("idle")]) == ["[SUMMARY] drove 1 item(s)"]
+
+def test_reports_driven_items_at_high_verbosity(caplog):
+    driver = create_driver(3)
+    driver.set_report_verbosity(pyuvm.UVM_HIGH)
+    assert reported_messages(caplog, driver, [DataSequenceItem("item", 1), IdleSequenceItem("idle"), DataSequenceItem("item", 2)]) == ["[DROVE] drove 1", "[DROVE] drove 2", "[SUMMARY] drove 2 item(s)"]
