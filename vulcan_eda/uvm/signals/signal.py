@@ -14,6 +14,10 @@ class Signal(BaseSignal):
     def value(self, value):
         self._handle.value = value
 
+    @property
+    def value_change(self):
+        return self._handle.value_change
+
     def __len__(self):
         return len(self._handle)
 

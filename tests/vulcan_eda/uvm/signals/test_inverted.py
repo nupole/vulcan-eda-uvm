@@ -18,6 +18,10 @@ from tests.support.signals import Handle
 def test_is_a_base_signal():
     assert isinstance(Inverted(Handle(1)), BaseSignal)
 
+def test_value_change_is_its_signal_trigger():
+    handle = Handle(1)
+    assert Inverted(handle).value_change is handle.value_change
+
 def test_reads_the_inverse_of_a_single_bit():
     assert Inverted(Handle(1, value=0)).value == 1
 

@@ -53,3 +53,6 @@ def test_random_value_follows_the_global_seed():
     first = bundle.random_value()
     random.seed(3)
     assert bundle.random_value() == first
+
+def test_value_change_fires_on_the_first_member_change():
+    assert isinstance(Bundle(Handle(1), Handle(1)).value_change, cocotb.triggers.First)

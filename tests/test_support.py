@@ -1,5 +1,6 @@
 import asyncio
 
+import cocotb
 import pytest
 import pyuvm
 
@@ -32,3 +33,6 @@ def test_scripted_driver_drives_data_onto_its_interface():
     handle = Handle(8)
     asyncio.run(ScriptedDriver(vulcan_eda.uvm.interfaces.SynchronousDataInterface(None, handle), []).drive(5))
     assert handle.value == 5
+
+def test_handle_has_its_own_value_change_trigger():
+    assert isinstance(Handle(8).value_change, cocotb.triggers.Trigger) and Handle(8).value_change is not Handle(8).value_change

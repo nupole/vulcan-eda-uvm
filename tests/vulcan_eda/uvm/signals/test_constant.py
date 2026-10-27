@@ -26,3 +26,6 @@ def test_is_a_base_signal():
 
 def test_random_value_is_its_value():
     assert Constant(5).random_value() == 5
+
+def test_value_change_is_a_trigger():
+    assert isinstance(Constant(5).value_change, cocotb.triggers.Trigger)

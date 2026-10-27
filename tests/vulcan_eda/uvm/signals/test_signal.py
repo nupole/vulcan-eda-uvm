@@ -45,3 +45,7 @@ def test_wrap_returns_base_signals_unchanged():
 def test_wrap_does_not_double_wrap():
     signal = Signal(Handle(8))
     assert Signal.wrap(signal) is signal
+
+def test_value_change_is_the_handle_trigger():
+    handle = Handle(8)
+    assert Signal(handle).value_change is handle.value_change

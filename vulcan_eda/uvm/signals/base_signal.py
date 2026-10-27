@@ -6,6 +6,11 @@ class BaseSignal(abc.ABC):
     def value(self):
         ...
 
+    @property
+    @abc.abstractmethod
+    def value_change(self):
+        ...
+
     @abc.abstractmethod
     def random_value(self):
         ...

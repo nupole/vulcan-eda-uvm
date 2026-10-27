@@ -1,3 +1,5 @@
+import cocotb
+
 from vulcan_eda.uvm.signals.base_signal import BaseSignal
 from vulcan_eda.uvm.signals.signal import Signal
 
@@ -13,6 +15,10 @@ class Bundle(BaseSignal):
     def value(self, values):
         for signal, value in zip(self._signals, values, strict=True):
             signal.value = value
+
+    @property
+    def value_change(self):
+        return cocotb.triggers.First(*(signal.value_change for signal in self._signals))
 
     def random_value(self):
         return tuple(signal.random_value() for signal in self._signals)

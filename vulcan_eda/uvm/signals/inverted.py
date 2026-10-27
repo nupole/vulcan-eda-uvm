@@ -14,6 +14,10 @@ class Inverted(BaseSignal):
     def value(self, value):
         self._signal.value = self._invert(value)
 
+    @property
+    def value_change(self):
+        return self._signal.value_change
+
     def __len__(self):
         return len(self._signal)
 
