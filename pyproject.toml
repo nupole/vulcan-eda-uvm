@@ -8,13 +8,13 @@ version = "0.0.0"
 description = "A UVM-based verification environment using cocotb and pyuvm"
 requires-python = ">=3.10"
 dependencies = [
-    "cocotb == 2.1.0",
-    "pyuvm == 5.0.0",
+    "cocotb >= 2.1",
+    "pyuvm >= 5.0",
 ]
 
 [project.optional-dependencies]
 test = [
-    "pytest",
+    "pytest >= 8",
 ]
 
 [tool.setuptools]
