@@ -13,7 +13,6 @@ from vulcan_eda.uvm.protocols.axi.stream.configs.environments import AxiStreamEn
 from vulcan_eda.uvm.protocols.axi.stream.configs.sequences import AxiStreamPacketSequenceConfig, AxiStreamPacketToBeatSequenceConfig
 from vulcan_eda.uvm.protocols.axi.stream.environments import AxiStreamEnvironment
 from vulcan_eda.uvm.protocols.axi.stream.sequences import RandomAxiStreamPacketSequence
-from vulcan_eda.uvm.sequences import DataSequence
 
 from tests.support.components import RecordingSubscriber, create_agent
 
@@ -29,7 +28,7 @@ class AxiStreamEnv(pyuvm.uvm_env):
         dut = cocotb.top
         AxiStreamEnvironmentConfig.from_prefix(dut, "upstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.TRANSMITTER).set(self, "upstream_environment")
         self.upstream_environment = AxiStreamEnvironment.create("upstream_environment", self)
-        AxiStreamEnvironmentConfig.from_prefix(dut, "downstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.RECEIVER).set(self, "downstream_environment")
+        AxiStreamEnvironmentConfig.from_prefix(dut, "downstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.RECEIVER, ready_generator=RandomBooleanGenerator(50)).set(self, "downstream_environment")
         self.downstream_environment = AxiStreamEnvironment.create("downstream_environment", self)
         AxiStreamEnvironmentConfig.from_prefix(dut, "downstream_", clk=dut.clk, role=AxiStreamEnvironmentConfig.Role.RECEIVER, is_active=pyuvm.uvm_active_passive_enum.UVM_PASSIVE).set(self, "passive_environment")
         self.passive_environment = AxiStreamEnvironment.create("passive_environment", self)
@@ -54,9 +53,6 @@ class AxiStreamTest(vulcan_eda.uvm.tests.BaseTest):
 
     async def stimulus(self):
         cocotb.start_soon(cocotb.clock.Clock(cocotb.top.clk, 10, unit = "ns").start())
-        ready_sequence = DataSequence.create("ready_sequence")
-        ready_sequence.data_generator = RandomBooleanGenerator(50)
-        cocotb.start_soon(ready_sequence.start(self.env.downstream_environment.sequencer))
         AxiStreamPacketToBeatSequenceConfig(RandomBooleanGenerator(50)).set(self.env.upstream_environment.sequencer)
         AxiStreamPacketSequenceConfig(num_packets=100).set(self.env.upstream_environment.sequencer)
         recording_random_axi_stream_packet_sequence = RecordingRandomAxiStreamPacketSequence.create("recording_random_axi_stream_packet_sequence")
@@ -68,6 +64,8 @@ class AxiStreamTest(vulcan_eda.uvm.tests.BaseTest):
         transfers = [(ready == 1 and valid == 1, last == 1) for ready, valid, last in self.env.transfer_recorder.items]
         if not any(last_transfer and last and next_transfer for (last_transfer, last), (next_transfer, _) in zip(transfers, transfers[1:])):
             self.uvm_report.error("BACK_TO_BACK", "no packet started right after the previous one ended")
+        if all(ready == 1 for ready, _, _ in self.env.transfer_recorder.items):
+            self.uvm_report.error("NO_BACKPRESSURE", "the receiver never lowered tready")
 
 def test_axi_stream(build_dir):
     runner = cocotb_tools.runner.get_runner('ghdl')

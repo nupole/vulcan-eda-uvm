@@ -4,6 +4,7 @@ import pytest
 import pyuvm
 
 from vulcan_eda.uvm.configs import BaseConfig
+from vulcan_eda.uvm.generators import ConstantGenerator, PatternGenerator
 from vulcan_eda.uvm.protocols.axi.stream.configs.environments import AxiStreamEnvironmentConfig
 
 PINS = ("tready", "tvalid", "tdata", "tlast")
@@ -38,3 +39,13 @@ def test_can_be_passive():
 def test_explicit_pins_are_all_required():
     with pytest.raises(TypeError):
         AxiStreamEnvironmentConfig(clk="clk", role=AxiStreamEnvironmentConfig.Role.TRANSMITTER, tready=1, tvalid=1, tdata=1)
+
+def test_is_always_ready_by_default():
+    assert from_prefix().ready_generator == ConstantGenerator(1)
+
+def test_from_prefix_takes_a_ready_generator_instead_of_a_pin():
+    assert from_prefix(ready_generator=PatternGenerator((0, 1))).ready_generator == PatternGenerator((0, 1))
+
+def test_rejects_a_one_shot_ready_generator():
+    with pytest.raises(TypeError, match="ready_generator must be re-iterable"):
+        from_prefix(ready_generator=iter((0, 1)))

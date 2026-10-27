@@ -3,7 +3,6 @@ import pyuvm
 from vulcan_eda.uvm.agents.agent import Agent
 from vulcan_eda.uvm.configs.agents.agent_config import AgentConfig
 from vulcan_eda.uvm.configs.layers.translation_layer_config import TranslationLayerConfig
-from vulcan_eda.uvm.generators.constant_generator import ConstantGenerator
 from vulcan_eda.uvm.interfaces.ready_valid_data_receiver_interface import ReadyValidDataReceiverInterface
 from vulcan_eda.uvm.interfaces.ready_valid_data_transmitter_interface import ReadyValidDataTransmitterInterface
 from vulcan_eda.uvm.layers.translation_layer import TranslationLayer
@@ -35,15 +34,13 @@ class AxiStreamEnvironment(pyuvm.uvm_env):
         if self._is_active_transmitter():
             self._layer.lower_sequencers["stream"] = self._agent.sequencer
             self.sequencer = self._layer.sequencer
-        elif self._config.is_active is pyuvm.uvm_active_passive_enum.UVM_ACTIVE:
-            self.sequencer = self._agent.sequencer
 
     def _interface(self):
         config = self._config
         pins = {"data": config.tdata, "last": config.tlast}
         if config.role is AxiStreamEnvironmentConfig.Role.TRANSMITTER:
             return ReadyValidDataTransmitterInterface(config.clk, config.tready, config.tvalid, pins, AxiStreamBeat)
-        return ReadyValidDataReceiverInterface(config.clk, config.tready, config.tvalid, pins, AxiStreamBeat, idle_generator=ConstantGenerator(1))
+        return ReadyValidDataReceiverInterface(config.clk, config.tready, config.tvalid, pins, AxiStreamBeat, idle_generator=config.ready_generator)
 
     def _is_active_transmitter(self):
         return self._config.role is AxiStreamEnvironmentConfig.Role.TRANSMITTER and self._config.is_active is pyuvm.uvm_active_passive_enum.UVM_ACTIVE
