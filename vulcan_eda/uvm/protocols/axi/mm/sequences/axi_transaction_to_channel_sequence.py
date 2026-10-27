@@ -19,14 +19,14 @@ class AxiTransactionToChannelSequence(TranslationSequence):
 
     async def translate(self, upper_item):
         self._config = AxiConfig.get(self.upper_sequencer)
+        txn = upper_item.data
+        if self._config.profile is AxiConfig.Profile.LITE and not (txn.num_beats == 1):
+            raise ValueError("AXI4-Lite transactions must be a single beat")
         self._sequence_config = AxiTransactionToChannelSequenceConfig.get(self.upper_sequencer)
         if not self._ready_started:
             self._start_ready("b", self._sequence_config.bready_generator)
             self._start_ready("r", self._sequence_config.rready_generator)
             self._ready_started = True
-        txn = upper_item.data
-        if self._config.profile is AxiConfig.Profile.LITE and not (txn.num_beats == 1):
-            raise ValueError("AXI4-Lite transactions must be a single beat")
         address = AxiAddress(address=txn.address, bytes_per_beat=self._config.bytes_per_beat, num_beats=txn.num_beats, id=txn.id, burst=txn.burst)
         if txn.access is AxiTransaction.Access.WRITE:
             strobe = 2 ** self._config.bytes_per_beat - 1
